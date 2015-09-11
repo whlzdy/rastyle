@@ -212,13 +212,13 @@ int main(int args,void **arg)
 	 // );
 	// return 0 ;
 	 //sleep(1);
-	 //acs_get_zigbee_pm_2_5(
-	 //	 &voc,
-	  //   &indoor_pm2_5
-	 //	);
+	 acs_get_zigbee_pm_2_5(
+	 	 &voc,
+	     &indoor_pm2_5
+	 	);
 	// sleep(1);
 	// return;
-	acs_get_zigbee_cO2(&cO2);
+	//acs_get_zigbee_cO2(&cO2);
 	// sleep(1);
 	//acs_get_zigbee_hcho(&hcho);
 	 return 0;
