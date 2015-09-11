@@ -143,6 +143,8 @@ int get_climate_callback (void * data, int col_count, char ** col_values, char *
 /************************************************************************/
 void *acs_client_thread(void *args)
 {
+	int userid;
+	char username[100] = {0};
 	int packlength = 0;
 	int sendbytes,recvbytes;
 	struct hostent *host;
@@ -190,26 +192,36 @@ Reconnetion:
 	//update user table
 	acs_update_user_from_cloud(sockfd);
 	printf("public information consult  completed \n");
-	acs_client_mode |= 0x01; //active normal mode
 	while(1)
 	{
-		printf("acs client is waiting receive data ...\n");
+		//printf("acs client is waiting receive data ...\n");
 		memset(recv_msg,0,65536);
 		//recvbytes = recv(sockfd, recv_msg, sizeof(recv_msg), MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg,&packlength );
 		if(recvbytes == -1 )
 		{
-			perror("acs receved server message ack failed \n");
-			handle_socket_reconnection();
-			goto Reconnetion;
-		}
-		if(packlength < 0)
-		{
+			TusSleep(10000); //set time interval
 			continue;
 		}
 		memset(buffer,0,sizeof(buffer));
 		memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
 		printf("cloud control message is %s len is %d\n",buffer,strlen(buffer));
+		 //need check username  query user table
+		userid = acs_get_user_id(buffer,recvbytes);
+		strcat(username,deseliaze_protocal_data(buffer,recvbytes));
+		if(acs_verify_user_name(userid,username) != 0);
+		{
+			printf("username is not match userid!  \n");
+			send(sockfd,
+					seliaze_protocal_data(fail_msg,strlen(fail_msg),connection,TEST_USER_ID),
+					strlen(fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
+					0
+					);
+			acs_client_mode &= 0x00;
+			continue;
+
+		}
+		acs_client_mode |= 0x01; //active normal mode
 		if(strcmp(buffer,"Apply_for_control_authority;") == 0)
 		{
 			//send confirm msg

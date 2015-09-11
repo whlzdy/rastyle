@@ -173,6 +173,39 @@ extern void *acs_udp_broadcast_thread(void *args);   //udp broadcast thread main
 extern void *acs_read_sensor_thread(void *args);     //read sensor data and store data to sqlite
 extern void *acs_server_bluetooth_thread(void *args);//read bluetooth data
 
+static int select_very_callback(void * data, int col_count, char ** col_values, char ** col_Name)
+{
+	  int i;
+	  for( i=0; i < col_count; i++)
+	  {
+			printf( "%s = %s\n", col_Name[i], col_values[i] == 0 ? "NULL" : col_values[i] );
+		    strcat(data,col_values[i]);
+	  }
+	  return 0;
+}
+
+/*
+ * acs to verify username
+ * 0 : sucess -1 :fail
+*/
+int acs_verify_user_name_test(int protocal_userid,char * username)
+{
+	char value[20] = {0};
+	char sSQL[100] = {0};
+	sprintf(sSQL,"select UserID from acs_user_table where Username = '%s';",username);
+	sqlite_get_record_data(ACS_CONFIG_DATEBASE,sSQL,select_very_callback,&value);
+	printf("protocal_userid is %d \n",protocal_userid);
+	printf("table useid is %d \n",atoi(value));
+	if(protocal_userid == atoi(value))
+	{
+		return 0;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
 /*
  *system main entry *
         系统main函数入口点
@@ -202,6 +235,7 @@ int main(int args,void **arg)
 	 float indoor_pm2_5;
 	 float cO2;
 	 float hcho;
+	 acs_verify_user_name_test(20,"12345678900");
 	 //acs_get_inter_pm2_5(&unit,&pm2_5,&voc);
 	 //return 0;
 
@@ -212,10 +246,10 @@ int main(int args,void **arg)
 	 // );
 	// return 0 ;
 	 //sleep(1);
-	 acs_get_zigbee_pm_2_5(
-	 	 &voc,
-	     &indoor_pm2_5
-	 	);
+	 //acs_get_zigbee_pm_2_5(
+	 //	 &voc,
+	 //    &indoor_pm2_5
+	 //	);
 	// sleep(1);
 	// return;
 	//acs_get_zigbee_cO2(&cO2);
@@ -229,6 +263,7 @@ int main(int args,void **arg)
 	 pthread_attr_t acs_client_id_attr,acs_server_id_attr,udp_broadcast_attr,acs_sensor_attr,acs_bluetooth_attr;
 	 //system init
 	 system_init();
+	 acs_verify_user_name_test(20,"12345678900");
 	 //wifi_test();
 	 //sleep(5);
 	 //printf("acs_wind_motor_on %d \n",acs_wind_motor_on());

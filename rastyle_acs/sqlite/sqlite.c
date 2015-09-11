@@ -15,14 +15,15 @@
 #include "../systemconfig.h"
 
 
+
 int select_print_callback(void * data, int col_count, char ** col_values, char ** col_Name)
 {
-  // 每条记录回调一次该函数,有多少条就回调多少次
-  int i;
-  for( i=0; i < col_count; i++){
-    printf( "%s = %s\n", col_Name[i], col_values[i] == 0 ? "NULL" : col_values[i] );
-  }
-  return 0;
+	  // 每条记录回调一次该函数,有多少条就回调多少次
+	  int i;
+	  for( i=0; i < col_count; i++){
+		printf( "%s = %s\n", col_Name[i], col_values[i] == 0 ? "NULL" : col_values[i] );
+	  }
+	  return 0;
 }
 
 
