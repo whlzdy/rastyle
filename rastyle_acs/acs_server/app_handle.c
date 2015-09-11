@@ -147,23 +147,16 @@ int get_app_climate_callback (void * data, int col_count, char ** col_values, ch
 */
 void *handle_app_request_thread(void *args)
 {
-	int  userid;
-	char username[100] = {0};
 	char buffer[65536] = {0};
 	char recv_msg[65536] = {0};
 	char tmp_msg[1024] = {0};
 	int sockfd,rc;
 	int recvbytes ;
 	int length;
-	int ret;
 	sockfd = *(((thread_arg*)args)->psockfd);
 	printf("app handle thread sockfd is %d created \n",sockfd);
 	//s1 : setup connection
-    ret = stetup_acs_app_connection(sockfd);
-    if(ret != 0)
-    {
-    	return 0;
-    }
+    stetup_acs_app_connection(sockfd);
 	//s2 : public message consult
     app_public_information_consult(sockfd);
     //s3 : register sensor callback
@@ -187,19 +180,6 @@ void *handle_app_request_thread(void *args)
 			memset(buffer,0,65536);
 			memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
 			printf("app control message is %s len is %d\n",buffer,strlen(buffer));
-			 //need check username  query user table
-			userid = acs_get_user_id(buffer,recvbytes);
-			strcat(username,deseliaze_protocal_data(buffer,recvbytes));
-			if(acs_verify_user_name(userid,username) != 0);
-			{
-				printf("username is not match userid!  \n");
-				send(sockfd,
-						seliaze_protocal_data(fail_msg,strlen(fail_msg),connection,TEST_USER_ID),
-						strlen(fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-						0
-						);
-				continue;
-			}
 			if(strcmp(buffer,"Apply_for_control_authority;") == 0)
 			{
 				//send confirm msg
