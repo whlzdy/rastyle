@@ -205,17 +205,17 @@ static int serilaze_inter_sensor_data (
 	 offset+=strlen(tmp);
 
      memset(tmp,0,100);
-	 sprintf(tmp,"%s=%f,", "室内PM2.5",indoor_pm2_5);
+	 sprintf(tmp,"%s=%1.f,", "室内PM2.5",indoor_pm2_5);
 	 strcat(data_msg+offset,tmp);
 	 offset+=strlen(tmp);
 
      memset(tmp,0,100);
-	 sprintf(tmp,"%s=%f,", "室内CO2",cO2);
+	 sprintf(tmp,"%s=%d,", "室内CO2",(int)cO2);
 	 strcat(data_msg+offset,tmp);
 	 offset+=strlen(tmp);
 
      memset(tmp,0,100);
-	 sprintf(tmp,"%s=%f", "室内甲醛",hcho);
+	 sprintf(tmp,"%s=%1.3f", "室内甲醛",hcho);
 	 strcat(data_msg+offset,tmp);
 	 offset+=strlen(tmp);
 
@@ -244,12 +244,12 @@ void *acs_read_sensor_thread(void *args)
     char sensor_data[1024];
     char sensor_data_2[1024];
     char sensor_data_3[1024];
-    uint16_t  indoor_tmp = 29;
-    uint16_t  indoor_humidity = 54;
-	uint8_t   voc = 3;
-	float indoor_pm2_5 = 58;
-	float cO2 = 560;
-	float hcho = 485;
+    uint16_t  indoor_tmp = 29,last_indoor_tmp;
+    uint16_t  indoor_humidity = 54,last_indoor_humidity;
+	uint8_t   voc = 3,last_voc;
+	float indoor_pm2_5 = 58,last_indoor_pm2_5;
+	float cO2 = 56,last_cO2;
+	float hcho = 28,last_hcho;
 	//read zigbee data
     sensor_fd = zigbee_fd;
 	printf("acs is read sensor is %s  \n",ZIGBEE);
@@ -273,20 +273,35 @@ void *acs_read_sensor_thread(void *args)
 #endif
 		acs_get_inter_temperature_and_humidity(&tem,&humidity);
 		usleep(50000);
-#if 0
-		acs_get_zigbee_tmp_and_humidity(
+#if 1
+		ret = acs_get_zigbee_tmp_and_humidity(
 			  & indoor_tmp,
-		  & indoor_humidity
+		      & indoor_humidity
 			  );
-		 sleep(1);
-		 acs_get_zigbee_pm_2_5(
+		if(ret == 0)
+		{
+			last_indoor_tmp = indoor_tmp;
+			last_indoor_humidity = indoor_humidity;
+		}
+		ret = acs_get_zigbee_pm_2_5(
 				&voc,
 				&indoor_pm2_5
 				);
-		 sleep(1);
-		 acs_get_zigbee_cO2(&cO2);
-		 sleep(1);
-		 acs_get_zigbee_hcho(&hcho);
+		if(ret == 0)
+		{
+			last_voc = voc;
+			last_indoor_pm2_5 = indoor_pm2_5;
+		}
+		ret = acs_get_zigbee_cO2(&cO2);
+		if(ret == 0)
+		{
+			last_cO2 = cO2;
+		}
+		ret = acs_get_zigbee_hcho(&hcho);
+		if(ret == 0)
+		{
+			last_hcho = hcho;
+		}
 #endif
 		acs_get_inter_laser_pm2_5(
 				&pm1_0_1,
@@ -297,9 +312,9 @@ void *acs_read_sensor_thread(void *args)
 				&pm10_2
 				);
 		serilaze_inter_sensor_data(sensor_data_2,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
-				indoor_tmp, indoor_humidity,voc,indoor_pm2_5,cO2,hcho,now,"DISPL_RTDMS:");
+				last_indoor_tmp,last_indoor_humidity,last_voc,last_indoor_pm2_5,last_cO2,last_hcho,now,"DISPL_RTDMS:");
 		serilaze_inter_sensor_data(sensor_data_3,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
-				indoor_tmp, indoor_humidity,voc,indoor_pm2_5,cO2,hcho,now,"DISPL_NMDMS:");
+				last_indoor_tmp, last_indoor_humidity,last_voc,last_indoor_pm2_5,last_cO2,last_hcho,now,"DISPL_NMDMS:");
 		//printf("%s \n",sensor_data_2);
 		//printf("acs_client_mode is %d in sensor  \n ",acs_client_mode);
 		memset(acs_protocal_frame,0,1024);
@@ -335,6 +350,6 @@ void *acs_read_sensor_thread(void *args)
 			//report data to app
 			acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(acs_app_handle_list.app_conn_list[i].fd,sensor_data_2,strlen(sensor_data_2));
 		}
-		TSleep(30);
+		TSleep(5);
 	}
 }
