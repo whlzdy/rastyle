@@ -135,7 +135,7 @@ void create_acs_climate_table(char * dbname)
 //create acs user table
 void create_acs_user_table(char * dbname)
 {
-	char * sSQL1 = "create table acs_user_table (UserID integer PRIMARY KEY,Username varchar(20),authorization varchar(20),isop varchar(20),Publickey varchar(128));";
+	char * sSQL1 = "create table acs_user_table (UserID integer PRIMARY KEY,Username varchar(20),PWD varchar(20),authorization varchar(20),isop varchar(20),Publickey varchar(128));";
 	sqlite3 *db = NULL;
 	char *zErrMsg = 0;
 	int rc;
@@ -164,4 +164,5 @@ void create_acs_abnormal_table(char * dbname)
 {
 	//do nothing
 }
+
 

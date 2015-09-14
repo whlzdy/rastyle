@@ -96,8 +96,6 @@ static void acs_handle_user_update_message(int sockfd,char * buffer)
 				//fprintf(stderr, "CGI[name ] :%s\n", name);
 				//fprintf(stderr, "CGI[value] :%s\n", token2);
 			}
-
-
 		}
 
 	}
@@ -106,8 +104,8 @@ static void acs_handle_user_update_message(int sockfd,char * buffer)
 	if(strcmp(order_msg,"CONAU_USADD") == 0)
 	{
 		printf( "CONAU_USADD handle entry \n");
-		sprintf(sSQL,"insert into %s values('%s','%s','%s','%s','%s');",ACS_USER_DATA,sensor_data_list[1].data, \
-						sensor_data_list[0].data,sensor_data_list[2].data,sensor_data_list[3].data,sensor_data_list[4].data);
+		sprintf(sSQL,"insert into %s values('%s','%s','%s','%s','%s','%s');",ACS_USER_DATA,sensor_data_list[2].data, \
+						sensor_data_list[0].data,sensor_data_list[1].data,sensor_data_list[3].data,sensor_data_list[4].data,sensor_data_list[5].data);
 		fprintf(stderr,"CONAU_USADD sql is %s \n",sSQL);
 	}
 	else if(strcmp(order_msg,"CONAU_USMOD") == 0)

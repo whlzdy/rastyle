@@ -143,6 +143,8 @@ int get_climate_callback (void * data, int col_count, char ** col_values, char *
 /************************************************************************/
 void *acs_client_thread(void *args)
 {
+	int userid;
+	char username[100] = {0};
 	int packlength = 0;
 	int sendbytes,recvbytes;
 	struct hostent *host;
@@ -197,19 +199,14 @@ Reconnetion:
 		memset(recv_msg,0,65536);
 		//recvbytes = recv(sockfd, recv_msg, sizeof(recv_msg), MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg,&packlength );
-		if(recvbytes == -1 )
-		{
-			perror("acs receved server message ack failed \n");
-			handle_socket_reconnection();
-			goto Reconnetion;
-		}
 		if(packlength < 0)
 		{
 			continue;
 		}
 		memset(buffer,0,sizeof(buffer));
-		memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
+		memcpy(buffer,deseliaze_protocal_data(recv_msg,packlength),strlen(deseliaze_protocal_data(recv_msg,packlength))-1);//delete end flag
 		printf("cloud control message is %s len is %d\n",buffer,strlen(buffer));
+		 //need check username  query user table
 		if(strcmp(buffer,"Apply_for_control_authority;") == 0)
 		{
 			//send confirm msg

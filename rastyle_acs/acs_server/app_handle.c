@@ -153,10 +153,16 @@ void *handle_app_request_thread(void *args)
 	int sockfd,rc;
 	int recvbytes ;
 	int length;
+	int ret;
 	sockfd = *(((thread_arg*)args)->psockfd);
 	printf("app handle thread sockfd is %d created \n",sockfd);
 	//s1 : setup connection
-    stetup_acs_app_connection(sockfd);
+    ret = stetup_acs_app_connection(sockfd);
+    if(ret != 0)
+    {
+    	printf("app info verify failed  sockfd %d quit \n",sockfd);
+        return 0;
+    }
 	//s2 : public message consult
     app_public_information_consult(sockfd);
     //s3 : register sensor callback

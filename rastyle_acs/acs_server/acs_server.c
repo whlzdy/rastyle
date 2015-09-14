@@ -102,7 +102,7 @@ void *acs_server_tcp_thread(void *args)
 			}
 			FD_SET(client_fd, &inset);
 			conn_count++;
-			printf("new socket connect to client,the socket fd is %d\n",client_fd);
+			//printf("new socket connect to client,the socket fd is %d\n",client_fd);
 			arg.psockfd = &client_fd;
 			AIM_pThreadCreate_auto(&acs_server_handle_id, handle_app_thread_attr, priority--,handle_app_request_thread, &arg);
 		}
