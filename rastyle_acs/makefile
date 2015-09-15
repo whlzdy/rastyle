@@ -9,7 +9,8 @@
 
 CC  		  = arm-arago-linux-gnueabi-gcc
 CFLAGS  	  = -g -O
-LIBS    	  = -lpthread -lm -Wall -ldl -lsqlite3  
+#LIBS    	  = -lpthread -lm -Wall -ldl -lsqlite3  -lssl -lcrypto
+LIBS    	  = -lpthread -lm -Wall -ldl -lsqlite3 
 DIRS          = . ./acs_client ./acs_serve ./protocal ./guard ./hal ./openssl ./sqlite ./business/config_status_sync ./business/connetion \
                   ./business/device_control ./business/normal_report ./business/public_info_consult ./business/real_time_report \
                   ./business/sign_out  ./hal/zigbee/  ./acs_server_bluetooth/ ./device_control/ ./hal/wind_motor ./hal/inter_sensor/

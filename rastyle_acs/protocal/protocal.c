@@ -124,10 +124,12 @@ int acs_verify_pwd(char * username,char * pwd)
 {
 	char value[100] = {0};
 	char sSQL[100] = {0};
-	sprintf(sSQL,"select UserID from acs_user_table where Username = '%s';",username);
+	printf("pwd is %s \n",pwd);
+	sprintf(sSQL,"select PWD from acs_user_table where Username = '%s';",username);
 	sqlite_get_record_data(ACS_CONFIG_DATEBASE,sSQL,select_very_callback,&value);
 	if(strcmp(pwd,value) == 0)
 	{
+		printf("password is correct ! \n");
 		return 0;
 	}
 	else

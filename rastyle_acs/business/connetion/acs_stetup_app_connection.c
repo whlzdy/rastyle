@@ -38,6 +38,7 @@ int stetup_acs_app_connection(int sockfd)
 {
 	char *tmp;
 	char username[100] = {0};
+	char pwd[100] = {0};
 	int userid;
 	int sendbytes,recvbytes;
 	char  buf[BUFFER_SIZE] = {0} ;
@@ -95,6 +96,7 @@ int stetup_acs_app_connection(int sockfd)
 		perror("send setup_pwd_msg falied ! ");
 		return -1;
 	}
+	memset(buf,0,1024);
 	recvbytes = recv(sockfd,buf,1024,0);
 	if(recvbytes < 0)
 	{
@@ -102,16 +104,19 @@ int stetup_acs_app_connection(int sockfd)
 		return -1;
 	}
 	printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
-	//if(acs_verify_pwd(username,deseliaze_protocal_data(buf,recvbytes)) != 0);
-	//{
-	//	printf("password wrong !\n");
-	//	send(sockfd,
-	//			seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
-	//			strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-	//			0
-	//			);
-	//	return -1;
-	//}
+	strcat(pwd,deseliaze_protocal_data(buf,recvbytes));
+	tmp = pwd;
+	token = strsep(&tmp, ";");
+	if(acs_verify_pwd(username,pwd) != 0)
+	{
+		printf("password wrong !\n");
+		send(sockfd,
+				seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
+				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
+				0
+				);
+		return -1;
+	}
 	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	//send confirm
 	send(sockfd,
