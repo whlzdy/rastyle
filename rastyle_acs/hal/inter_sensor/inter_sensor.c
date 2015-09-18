@@ -89,9 +89,9 @@ static int acs_get_inter_sensor_frame(uint8_t * data,uint8_t length)
 	struct timeval tv;
 	tv.tv_sec  = WIND_MOTOR_MAX_WAIT_TIME;
 	tv.tv_usec = 0;
+	fd_set input;
 	while(1)
 	{
-		fd_set input;
 		FD_ZERO(&input);
 		FD_SET(inter_sensor_fd, &input);
 		int ret = select(inter_sensor_fd+1, &input, NULL, NULL, &tv);
@@ -103,6 +103,7 @@ static int acs_get_inter_sensor_frame(uint8_t * data,uint8_t length)
 		else if (ret == 0)
 		{
 			printf("read sensor timeout \n");
+			return -2;
 		}
 		else
 		{
@@ -119,11 +120,9 @@ static int acs_get_inter_sensor_frame(uint8_t * data,uint8_t length)
 					receive_flag = 1;
 					//printf("start ,offset is %d\n",offset);
 					continue;
-				}
-				//end flag
-				if(buffer[0] == 0XFF && buffer[1] == 0xfe)
+				} //end flag
+				else if(buffer[0] == 0XFF && buffer[1] == 0xfe)
 				{
-
 					memcpy(acs_protocal_frame+offset,buffer,ret);
 					offset += ret;
 					receive_flag = 0;
@@ -132,14 +131,18 @@ static int acs_get_inter_sensor_frame(uint8_t * data,uint8_t length)
 				}
 				if(receive_flag)
 				{
-
 					//receive body data
+					if(offset >= 254 )
+					{
+						return -3;
+					}
 					memcpy(acs_protocal_frame+offset,buffer,ret);
 					offset+=ret;
 					//printf("reciveing... ,offset is %d\n",offset);
 					continue;
 				}
 			 }
+			 continue;
 		}
 handle_whole_data:
 	   //printf("acs read %d length wind motor data \n",offset);
@@ -151,11 +154,19 @@ handle_whole_data:
 		{
 			offset = 0;
 			memset(acs_protocal_frame,0,255);
-			printf("wind motor 485 dicard count is %d \n",discard_count);
+			printf("inter_sensor 485 dicard count is %d \n",discard_count);
 			continue;
 		}
-		memcpy(data,acs_protocal_frame,offset);
-		return 0;
+		if(receive_flag == 0)
+		{
+			memcpy(data,acs_protocal_frame,offset);
+			return 0;
+		}
+		else
+		{
+			return -2;
+		}
+
 	 }
 }
 
@@ -178,8 +189,8 @@ int acs_get_inter_temperature_and_humidity(uint8_t * tem,uint8_t  *humidity)
 		return ret;
 	}
 	//get response
-	acs_get_inter_sensor_frame(data,sizeof(data));
-	if(data[5] == tmp_cid)
+	ret = acs_get_inter_sensor_frame(data,sizeof(data));
+	if(ret == 0 && data[5] == tmp_cid)
 	{
 		//
 	    *tem = data[6];
@@ -220,9 +231,11 @@ int acs_get_inter_laser_pm2_5(
          return ret;
     }
     //get response
-    acs_get_inter_sensor_frame(data,sizeof(data));
-    if(data[5] == tmp_cid)
+    ret = acs_get_inter_sensor_frame(data,sizeof(data));
+    //printf("acs_get_inter_laser_pm2_5  1\n");
+    if(ret == 0 && data[5] == tmp_cid)
     {
+    	//printf("acs_get_inter_laser_pm2_5 sucessful 2\n");
        // for(i = 0;i< data[4];i++)
        // {
         //    printf("index is %d,value is %d \n",i,data[6+i]);
@@ -235,10 +248,12 @@ int acs_get_inter_laser_pm2_5(
         *pm10_2 =  data[16] << 8 | data[17];
         //printf("pm1_0_1 is %d ug/m3,,pm2_5_1 is %d ug/m3,pm10_1 is %d ug/m3,pm1_0_2 is %d ug/m3,pm2_5_2 is %d ug/m3,pm10_2 is %d ug/m3\n",\
                 pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2);
+
         return 0;
     }
     else
     {
+    	//printf("acs_get_inter_laser_pm2_5 failed 3\n");
         return -1;
     }
  }
@@ -261,13 +276,13 @@ int acs_get_inter_pm2_5(uint8_t * unit,float * pm2_5,uint8_t * voc)
 		 return ret;
 	}
 	//get response
-	acs_get_inter_sensor_frame(data,sizeof(data));
-	if(data[5] == tmp_cid)
+	ret = acs_get_inter_sensor_frame(data,sizeof(data));
+	if(ret == 0 && data[5] == tmp_cid)
 	{
-	    for(i = 0;i< data[4];i++)
-		{
-		   printf("index is %d,value is %d \n",i,data[6+i]);
-		}
+	    //for(i = 0;i< data[4];i++)
+		//{
+		 //  printf("index is %d,value is %d \n",i,data[6+i]);
+		//}
 		*unit = data[6];
 		//memcpy(pm2_5,&data[7],sizeof(float));
 		*pm2_5 =  data[7] + data[8] * 0.01;

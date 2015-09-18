@@ -183,15 +183,17 @@ int main(int args,void **arg)
 
 	 system_init();
 	 //printf("电机测试开始启动。。。\n");
-	 //printf("acs_get_inter_temperature_and_humidity %d \n",acs_get_inter_temperature_and_humidity());
-	 //usleep(50000);
+	// printf("acs_get_inter_temperature_and_humidity %d \n",acs_get_inter_temperature_and_humidity());
+	// usleep(50000);
 	 //printf("acs_get_inter_pm2_5 %d \n",acs_get_inter_pm2_5());
+	// usleep(50000);
 	 //printf("acs_get_inter_laser_pm2_5 %d \n",acs_get_inter_laser_pm2_5());
 	 //return -2;
-	// printf("acs_wind_motor_on %d \n",acs_wind_motor_on());
+	 printf("acs_wind_motor_on %d \n",acs_wind_motor_on());
 
      //printf("acs_wind_motor_off %d \n",acs_wind_motor_off());
-	// printf("acs_wind_motor_change_rate %d\n",acs_wind_motor_change_rate(80));
+	 printf("acs_wind_motor_change_rate %d\n",acs_wind_motor_change_rate(80));
+	 return;
 	 //printf("acs_wind_motor_off %d \n",acs_wind_motor_off());
 	 //printf("args is %d \n" ,args);
 	 uint8_t  unit;
@@ -243,13 +245,13 @@ int main(int args,void **arg)
      AIM_pThreadCreate(&acs_sensor_id, acs_sensor_attr,  PTH_PRIO_HIGH_1 , acs_read_sensor_thread, NULL);
 	 printf("create acs sensor read  process sucessfully !\n");
 	 //AIM_pThreadCreate(&acs_bluetooth_id, acs_bluetooth_attr, PTH_PRIO_LOWEST, acs_server_bluetooth_thread, NULL);
-	// printf("create acs bluetooth  process sucessfully !\n");
+	 // printf("create acs bluetooth  process sucessfully !\n");
 	 if(pthread_join(acs_server_id, NULL))
 	   perror("acs server Join thread main_ctrl error");
      if(pthread_join(acs_client_id, NULL))
       perror("acs client Join thread main_ctrl error");
      if(pthread_join(udp_broadcast_id, NULL))
-   	   perror("udp broadcast Join thread main_ctrl error");
+   	    perror("udp broadcast Join thread main_ctrl error");
      if(pthread_join(acs_sensor_id, NULL))
       perror("sensor read Join thread main_ctrl error");
     // if(pthread_join(acs_bluetooth_id, NULL))

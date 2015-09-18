@@ -149,19 +149,27 @@ int acs_tcp_receive(int client_sock,char* info,int *length)
 {
 	  char frame_msg[65536] = {0};
 	  int num = 0;
-	  uint16_t packLength;
+	  uint16_t packLength = 0;
 	  num = recv(client_sock,frame_msg,10,MSG_NOSIGNAL);
-	  if(num < 10)
+	  if(num < 0)
 	  {
 		  return -1;
+	  }
+	  if(num < 10)
+	  {
+		  return -2;
 	  }
 	  memcpy(&packLength,&frame_msg[8],sizeof(uint16_t));
 	  //printf("packLength is %d \n",packLength);
 	  num = 0;
 	  num = recv(client_sock,frame_msg+10,packLength-10,MSG_NOSIGNAL);
-	  if(num < packLength-10)
+	  if(num < 0)
 	  {
 		  return -1;
+	  }
+	  if(num < packLength-10)
+	  {
+		  return -3;
 	  }
 	  memcpy(info,frame_msg,packLength);
 	  *length = packLength;

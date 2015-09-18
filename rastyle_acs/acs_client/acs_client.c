@@ -199,9 +199,15 @@ Reconnetion:
 		memset(recv_msg,0,65536);
 		//recvbytes = recv(sockfd, recv_msg, sizeof(recv_msg), MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg,&packlength );
-		if(packlength < 0)
+		if(recvbytes < -1)
 		{
+			TusSleep(10000);
 			continue;
+		}
+		else if(recvbytes == -1)
+		{
+			 handle_socket_reconnection();
+			 goto Reconnetion;
 		}
 		memset(buffer,0,sizeof(buffer));
 		memcpy(buffer,deseliaze_protocal_data(recv_msg,packlength),strlen(deseliaze_protocal_data(recv_msg,packlength))-1);//delete end flag

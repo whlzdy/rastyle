@@ -232,7 +232,6 @@ void *acs_read_sensor_thread(void *args)
     uint8_t tem,humidity;
     uint16_t pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2;
 	uint8_t  buffer[2]  = {0};
-	uint8_t  acs_protocal_frame[1024] = {0};
 	uint8_t  receive_flag = 0 ,discard_count = 0;
 	int sensor_fd,ret;
 	struct timeval tv;
@@ -251,10 +250,10 @@ void *acs_read_sensor_thread(void *args)
 	float cO2 = 56,last_cO2;
 	float hcho = 28,last_hcho;
 	//read zigbee data
-    sensor_fd = zigbee_fd;
-	printf("acs is read sensor is %s  \n",ZIGBEE);
-	tv.tv_sec  = SENSOR_MAX_WAIT_TIME;
-	tv.tv_usec = 0;
+    //sensor_fd = zigbee_fd;
+	//printf("acs is read sensor is %s  \n",ZIGBEE);
+	//tv.tv_sec  = SENSOR_MAX_WAIT_TIME;
+	//tv.tv_usec = 0;
 	offset = 0;
 	while(1)
 	{
@@ -303,21 +302,17 @@ void *acs_read_sensor_thread(void *args)
 			last_hcho = hcho;
 		}
 #endif
-		acs_get_inter_laser_pm2_5(
-				&pm1_0_1,
-				&pm2_5_1,
-				&pm10_1,
-				&pm1_0_2,
-				&pm2_5_2,
-				&pm10_2
-				);
+		//printf("11111 \n");
+		acs_get_inter_laser_pm2_5(&pm1_0_1,&pm2_5_1,&pm10_1,&pm1_0_2,&pm2_5_2,&pm10_2);
+		//printf("2222222 \n");
 		serilaze_inter_sensor_data(sensor_data_2,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
 				last_indoor_tmp,last_indoor_humidity,last_voc,last_indoor_pm2_5,last_cO2,last_hcho,now,"DISPL_RTDMS:");
+		//printf("3333333 \n");
 		serilaze_inter_sensor_data(sensor_data_3,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
 				last_indoor_tmp, last_indoor_humidity,last_voc,last_indoor_pm2_5,last_cO2,last_hcho,now,"DISPL_NMDMS:");
 		//printf("%s \n",sensor_data_2);
 		//printf("acs_client_mode is %d in sensor  \n ",acs_client_mode);
-		memset(acs_protocal_frame,0,1024);
+		//printf("4444444 \n");
 		if(acs_client_mode & 0x01)
 		{
 			if(flag1 || difftime(now,last1) >= acs_normal_report_inteval)
@@ -350,6 +345,7 @@ void *acs_read_sensor_thread(void *args)
 			//report data to app
 			acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(acs_app_handle_list.app_conn_list[i].fd,sensor_data_2,strlen(sensor_data_2));
 		}
+		//printf("sensor thread is survive \n");
 		TSleep(5);
 	}
 }
