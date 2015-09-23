@@ -12,12 +12,13 @@
 
 
 
+char *js_private_decrypt(const char *cipher_text,int length, char *private_key);
 
-char* rsa_decrypt_private(unsigned char *enc,int enc_len,char* private_key_str,int p_len,int *dec_len);
-char* rsa_decrypt_public(unsigned char *enc,int enc_len,char* private_key_str,int p_len,int *dec_len);
-char* rsa_encrypt_private(unsigned char*txt,int txt_len,char* public_key_str,int p_len,int* enc_len);
-char* rsa_encrypt_public(unsigned char*txt,int txt_len,char* public_key_str,int p_len,int* enc_len);
+char *js_public_encrypt(const char *plain_text,int * length, char *public_key);
 
+char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_key);
+
+char *js_private_encrypt(const char *plain_text,int * encode_len  char *private_key);
 
 
 

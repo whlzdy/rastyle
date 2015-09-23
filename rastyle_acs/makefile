@@ -10,8 +10,8 @@
 CC  		  = arm-arago-linux-gnueabi-gcc
 CFLAGS  	  = -g -O
 #LIBS    	  = -lpthread -lm -Wall -ldl -lsqlite3  -lssl -lcrypto
-LIBS    	  = -lpthread -lm -Wall -ldl -lsqlite3 
-DIRS          = . ./acs_client ./acs_serve ./protocal ./guard ./hal ./openssl ./sqlite ./business/config_status_sync ./business/connetion \
+LIBS    	  = -lpthread -lm -Wall -ldl -lsqlite3 /home/whl/my_openssl/lib/libssl.a  /home/whl/my_openssl/lib/libcrypto.a   
+DIRS          = . ./acs_client ./acs_serve ./protocal ./guard ./hal ./openssl/des ./openssl/rsa ./sqlite ./business/config_status_sync ./business/connetion \
                   ./business/device_control ./business/normal_report ./business/public_info_consult ./business/real_time_report \
                   ./business/sign_out  ./hal/zigbee/  ./acs_server_bluetooth/ ./device_control/ ./hal/wind_motor ./hal/inter_sensor/
                   
@@ -20,7 +20,7 @@ OBJS 		  =	rastyle_acs_main.o common_utils.o udp_broadcast.o ./protocal/protocal
 				 ./acs_client/acs_client.o  ./acs_server/app_handle.o ./acs_server/acs_server.o ./business/connetion/acs_stetup_app_connection.o ./hal/zigbee/sensor.o \
                  ./acs_server_bluetooth/bluetoot_public_infor_consult.o ./acs_server_bluetooth/bluetooth_conn_msg_config.o  ./acs_server_bluetooth/bluetooth_conn_setup.o \
                  ./acs_server_bluetooth/bluetooth_first_conn.o ./acs_server_bluetooth/acs_bluetooth.o ./sqlite/sqlite.o ./device_control/device_control.o ./hal/wind_motor/wind_motor.o ./hal/inter_sensor/inter_sensor.o \
-                 ./hal/zigbee/zigbee.o ./acs_client/acs_user_update.o
+                 ./hal/zigbee/zigbee.o ./acs_client/acs_user_update.o ./openssl/des/acs_des.o ./openssl/rsa/acs_rsa.o 
                  
 INCLUDES 	  = -I . 
 TARGETS		  = air_acs
@@ -58,6 +58,8 @@ wind_motor.o : ./hal/wind_motor/wind_motor.c
 inter_sensor.o : ./hal/inter_sensor/inter_sensor.c
 zigbee.o       : ./hal/zigbee/zigbee.c
 acs_user_update.o : ./acs_client/acs_user_update.c
+acs_des.o      : ./openssl/des/acs_des.c
+acs_rsa.o      : ./openssl/rsa/acs_rsa.c
 
 app_handle.o : $(APP_HANDLE_OBJ)
 	$(CC) -c ./acs_server/app_handle.c
