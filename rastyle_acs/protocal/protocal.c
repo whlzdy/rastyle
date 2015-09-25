@@ -74,6 +74,26 @@ char* deseliaze_protocal_data(uint8_t * body_data,uint16_t length)
 	return g_frame_data;
 }
 
+
+char * deseliaze_protocal_encode_data(uint8_t * body_data,uint16_t length,uint16_t * encode_len)
+{
+    uint32_t userid = 0;
+	uint16_t offset = 0;
+	uint16_t tmp_16 = 0;
+	memcpy(&userid,body_data+4,sizeof(uint32_t));
+	//printf("user id  is %d \n",userid);
+	memset(g_frame_data,0,PROTOCAL_FRAME_MAX_LENGTH);
+    //get data length
+	memcpy(&tmp_16,body_data+8,sizeof(uint16_t));
+	//printf("frame length is %d \n",tmp_16);
+	memcpy(g_frame_data,body_data+10,tmp_16-11);
+	if(encode_len)
+	{
+		*encode_len = tmp_16-11;
+	}
+	return g_frame_data;
+}
+
 int acs_get_user_id(uint8_t * body_data,uint16_t length)
 {
     uint32_t userid = 0;

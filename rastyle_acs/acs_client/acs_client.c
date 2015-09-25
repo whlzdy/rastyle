@@ -188,9 +188,9 @@ Reconnetion:
 	printf("socket sucessful to connect to server\n");
     build_acs_connection(sockfd);
 	printf("acs connetion completed \n");
-	public_information_consult(sockfd);
+	//public_information_consult(sockfd);
 	//update user table
-	acs_update_user_from_cloud(sockfd);
+	//acs_update_user_from_cloud(sockfd);
 	printf("public information consult  completed \n");
 	acs_client_mode |= 0x01; //active normal mode
 	while(1)

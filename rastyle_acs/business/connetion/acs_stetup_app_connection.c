@@ -18,8 +18,10 @@
 
 
 #include "../../protocal/protocal.h"
+#include "../../openssl/rsa/acs_rsa.h"
+#include "../../systemconfig.h"
 
-#define BUFFER_SIZE (65536+20)
+
 #define VERYFY_STRING_LENGTH 1024
 
 //build connect setups use to test
@@ -36,7 +38,8 @@ static char setup_fail_msg[]    = "Fail;";
 
 int stetup_acs_app_connection(int sockfd)
 {
-	char *tmp;
+	int packagelength = 0;
+	char *tmp = NULL;
 	char username[100] = {0};
 	char pwd[100] = {0};
 	int userid;
@@ -78,12 +81,12 @@ int stetup_acs_app_connection(int sockfd)
 	if(acs_verify_user_name(userid,username) != 0)
 	{
 		printf("username is %s username is not match userid!  \n",username);
-		send(sockfd,
-				seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
-				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-				0
-				);
-		return -1;
+		//send(sockfd,
+		//		seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
+		//		strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
+		//		0
+		//		);
+		//return -1;
 	}
 	//need check username
 	//acs send pwd
@@ -96,26 +99,37 @@ int stetup_acs_app_connection(int sockfd)
 		perror("send setup_pwd_msg falied ! ");
 		return -1;
 	}
-	memset(buf,0,1024);
-	recvbytes = recv(sockfd,buf,1024,0);
+	memset(buf,0,BUFFER_SIZE);
+	//receive rsa encrypt password
+	recvbytes = acs_tcp_receive(sockfd,buf,&packagelength);
 	if(recvbytes < 0)
 	{
-		perror("acs could received server verify string failed 2 \n");
-		return -1;
+		perror("acs could received app user password \n");
+		return recvbytes;
 	}
-	printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
-	strcat(pwd,deseliaze_protocal_data(buf,recvbytes));
+	//begin rsa decrypt
+#ifdef ACS_ENCRYPT_FLAG
+	int encode_len;
+	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
+	//deseliaze_protocal_encode_data(buf,packagelength,&encode_len);
+	encode_len = packagelength -11;
+	printf("encode_len is %d \n",encode_len);
+	strcat(pwd,js_public_decrypt(deseliaze_protocal_encode_data(buf,packagelength,NULL),encode_len, ACS_IOS_PUBLIC_KEY));
+#else
+	strcat(pwd,deseliaze_protocal_data(buf,packagelength));
+#endif
+	printf("password decrypt sucessful\n");
 	tmp = pwd;
 	token = strsep(&tmp, ";");
 	if(acs_verify_pwd(username,pwd) != 0)
 	{
 		printf("password wrong !\n");
-		send(sockfd,
-				seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
-				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-				0
-				);
-		return -1;
+		//send(sockfd,
+		//		seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
+		//		strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
+		//		0
+		//		);
+		//return -1;
 	}
 	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	//send confirm

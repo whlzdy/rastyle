@@ -56,7 +56,7 @@ void acs_app_realtime_handle(int sockfd,char *data,int length)
 	 // report real time data
 	//fprintf(stderr,"server is to sockfd %d report data .is %s \n",sockfd,data);
 	rc = send(sockfd,
-		 seliaze_protocal_data(data,strlen(data),real_time,TEST_USER_ID),
+		 seliaze_protocal_data(data,length,real_time,TEST_USER_ID),
 		 length+PROTOCAL_FRAME_STABLE_LENGTH,
 		 MSG_NOSIGNAL);
 }
@@ -173,7 +173,7 @@ void *handle_app_request_thread(void *args)
 		memset(recv_msg,0,65536);
 		//recvbytes = recv(sockfd,  recv_msg, sizeof(recv_msg),MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg, &length);
-		if(recvbytes == -1)
+		if(recvbytes <= -1)
 		{
 		     printf("sockfd is %d left as recv failed ",sockfd);
 			 FD_CLR(sockfd,&inset);
@@ -183,8 +183,28 @@ void *handle_app_request_thread(void *args)
 		}
 		if(length > 0)
 		{
+			int encode_len = 0;
 			memset(buffer,0,65536);
-			memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
+			//rsa decrypt
+			//memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
+			printf("app control message is %s len is %d\n",buffer,strlen(buffer));
+			printf("recv_msg[2] & 0xf0 is %d \n",recv_msg[2] & 0xf0);
+	        if((recv_msg[2] & 0xf0) == 0x50)
+	        {
+	        	//deseliaze_protocal_encode_data(recv_msg,length,&encode_len);
+	        	encode_len = length - 11;
+	        	memcpy(buffer,
+	        			js_public_decrypt(deseliaze_protocal_encode_data(recv_msg,length,NULL),
+	        					encode_len,
+	        					ACS_IOS_PUBLIC_KEY),
+	        			encode_len
+	        			);
+
+	        }
+	        else
+	        {
+	        	memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
+	        }
 			printf("app control message is %s len is %d\n",buffer,strlen(buffer));
 			if(strcmp(buffer,"Apply_for_control_authority;") == 0)
 			{

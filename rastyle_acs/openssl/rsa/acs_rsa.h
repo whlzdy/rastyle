@@ -18,7 +18,7 @@ char *js_public_encrypt(const char *plain_text,int * length, char *public_key);
 
 char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_key);
 
-char *js_private_encrypt(const char *plain_text,int * encode_len  char *private_key);
+char *js_private_encrypt(const char *plain_text,int * encode_len,char *private_key);
 
 
 

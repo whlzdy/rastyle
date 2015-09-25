@@ -50,6 +50,9 @@ uint8_t* seliaze_protocal_data(uint8_t * body_data,uint16_t length,enum protcal_
 char* deseliaze_protocal_data(uint8_t * body_data,uint16_t length);
 
 
+char * deseliaze_protocal_encode_data(uint8_t * body_data,uint16_t length,uint16_t * encode_len);
+
+
 /*
 * acs get user id
 */

@@ -34,9 +34,8 @@
 
 #include "message.h"
 #include "common_utils.h"
+#include "systemconfig.h"
 
-
-static char broadcast_msg[] = "2514.325,1514.564,";
 
 #define MCAST_INTERVAL    3
 
@@ -102,6 +101,7 @@ void *acs_udp_broadcast_thread(void *args)
     char tmp_msg[100] = {0};
     char ip_msg[100] = {0};
     char bcast_msg[100] = {0};
+    char broadcast_msg[100] = {0};//"2514.325,1514.564,";
     //get ip address and bcast address
     acs_get_ipaddr_and_bcastaddr(ip_msg ,bcast_msg);
 	//create udp socket
@@ -117,6 +117,10 @@ void *acs_udp_broadcast_thread(void *args)
 	mcast_addr.sin_addr.s_addr  = inet_addr(bcast_msg);
 	mcast_addr.sin_port = htons(ACS_SERVER_TCP_PORT);
 	//s2:interval 3s report broadcast message
+    strcat(broadcast_msg,HARD_VERISION);
+    strcat(broadcast_msg,",");
+    strcat(broadcast_msg,SOFT_VERISION);
+    strcat(broadcast_msg,",");
 	while(1)
 	{
 		time(&now);

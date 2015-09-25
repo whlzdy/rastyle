@@ -31,7 +31,7 @@
 #include "../../common_utils.h"
 #include "../../sqlite/sqlite.h"
 #include "../inter_sensor/inter_sensor.h"
-
+#include "../../openssl/des/acs_des.h"
 
 #define READ_SENSOR_SLEEP_TIME  500
 
@@ -47,6 +47,8 @@ static int acs_client_fd;
 
 int acs_normal_report_inteval = 25;//s
 int acs_real_time_inteval = 30;    //s
+
+extern char ACS_DES_KEY[];         //des key
 
 
 
@@ -243,6 +245,8 @@ void *acs_read_sensor_thread(void *args)
     char sensor_data[1024];
     char sensor_data_2[1024];
     char sensor_data_3[1024];
+    char sensor_encode_data_realtime[65536] = {0};
+    char sensor_encode_data_normal[65536] = {0};
     uint16_t  indoor_tmp = 29,last_indoor_tmp;
     uint16_t  indoor_humidity = 54,last_indoor_humidity;
 	uint8_t   voc = 3,last_voc;
@@ -307,6 +311,15 @@ void *acs_read_sensor_thread(void *args)
 		//printf("2222222 \n");
 		serilaze_inter_sensor_data(sensor_data_2,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
 				last_indoor_tmp,last_indoor_humidity,last_voc,last_indoor_pm2_5,last_cO2,last_hcho,now,"DISPL_RTDMS:");
+
+		int real_time_encode_size = 0;
+		if(strlen(ACS_DES_KEY) > 0)
+		{
+			printf("ACS_DES_KEY is %s \n",ACS_DES_KEY);
+			DES_Encrypt(ACS_DES_KEY,sensor_data_2,&real_time_encode_size);
+		}
+
+
 		//printf("3333333 \n");
 		serilaze_inter_sensor_data(sensor_data_3,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
 				last_indoor_tmp, last_indoor_humidity,last_voc,last_indoor_pm2_5,last_cO2,last_hcho,now,"DISPL_NMDMS:");
@@ -343,7 +356,12 @@ void *acs_read_sensor_thread(void *args)
 		for(i = 0;i<acs_app_handle_list.app_conn_count;i++)
 		{
 			//report data to app
-			acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(acs_app_handle_list.app_conn_list[i].fd,sensor_data_2,strlen(sensor_data_2));
+			//acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(acs_app_handle_list.app_conn_list[i].fd,sensor_data_2,strlen(sensor_data_2));
+			if(strlen(ACS_DES_KEY) > 0)
+			{
+				acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(acs_app_handle_list.app_conn_list[i].fd,DES_Encrypt(ACS_DES_KEY,sensor_data_2,NULL),real_time_encode_size);
+			}
+
 		}
 		//printf("sensor thread is survive \n");
 		TSleep(5);

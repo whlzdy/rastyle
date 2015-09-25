@@ -25,7 +25,10 @@ char * DES_Encrypt(const char * key,const char * cleartext, int * encode_size)
 	DES_cblock keyEncrypt;
 	int size = strlen(cleartext);
 	encode_len = (((size%8) == 0)?size:(size/8+1)*8);
-	*encode_size = encode_len;
+	if(encode_size)
+	{
+		*encode_size = encode_len;
+	}
 	printf("encode_len is %d \n",encode_len);
 	strCipherText = malloc(encode_len);
 	memset(keyEncrypt, 0, 8);
@@ -95,7 +98,6 @@ char * DES_Decrypt(const char * key,const char * ciphertext, int size)
 
 
 
-
 #if  0
 
 static unsigned int get_file_size(const char *path)
@@ -111,45 +113,45 @@ static unsigned int get_file_size(const char *path)
     return filesize;
 }
 
-#define filepath "/home/whl/des.data"
+#define filepath "/home/whl/data.data"
 #define testpath "/home/whl/test.des"
 
 int main()
 {
-	char key[]="afsljflasjfasjfasfasfasf;"; // 16
+	char key[]="123321RastyleDESKEY";
 	char clear[]="罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标罗国标";
 	char *decrypted;
 	char *encrypted;
 	int filesize,num;
 	int size;
 	FILE *fp;
-	printf("In Main, Plain text\t : %s \n",clear);
-	encrypted=DES_Encrypt(key,clear,&size);
-	if((fp = fopen(filepath, "w+r"))==NULL)
-	{
-			printf("cant open the file \n");
-			exit(0);
-	}
-	fwrite(encrypted, sizeof(char), size, fp);
-	fclose(fp);
-	//filesize = get_file_size(testpath);
-	//encrypted = malloc(filesize);
-	//if((fp = fopen(testpath, "r+b"))==NULL)
+	//printf("In Main, Plain text\t : %s \n",clear);
+	//encrypted=DES_Encrypt(key,clear,&size);
+	//if((fp = fopen(filepath, "w+r"))==NULL)
 	//{
-	//	printf("cant open the file \n");
-	//	exit(0);
+	//		printf("cant open the file \n");
+	//		exit(0);
 	//}
+	//fwrite(encrypted, sizeof(char), size, fp);
+	//fclose(fp);
+	filesize = get_file_size(filepath);
+	encrypted = malloc(filesize);
+	if((fp = fopen(filepath, "r+b"))==NULL)
+	{
+		printf("cant open the file \n");
+		exit(0);
+	}
 
-	 //num = fread(encrypted, sizeof(unsigned char), filesize, fp);
-	// if(num != filesize)
-	// {
-	//	 printf("read failed num is %d \n",num);
-	//	 fclose(fp);
-	//	 return -1;
-	//}
-	//printf("begin decrypt \n");
-	decrypted=DES_Decrypt(key,encrypted,size);
-	printf("In Main, Encrypted text\t : %s \n",encrypted);
+	 num = fread(encrypted, sizeof(unsigned char), filesize, fp);
+	 if(num != filesize)
+	 {
+		 printf("read failed num is %d \n",num);
+		 fclose(fp);
+		 return -1;
+	}
+	printf("begin decrypt \n");
+	decrypted=DES_Decrypt(key,encrypted,filesize);
+	//printf("In Main, Encrypted text\t : %s \n",encrypted);
 	printf("In Main, Decrypted text\t : %s \n",decrypted);
 	exit(0);
 }

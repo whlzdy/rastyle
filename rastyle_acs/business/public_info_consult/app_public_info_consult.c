@@ -17,6 +17,8 @@
 #include <sys/socket.h>
 
 #include "../../protocal/protocal.h"  //rasytye protocal
+#include "../../systemconfig.h"
+
 
 static char report_keys_update_msg[] = "INFEX_SYKCF:KEY=ajHL823iasdfUIKadfg;";
 
@@ -33,22 +35,58 @@ static char report_2_app_user[] = "INFEX_OAREQ:role=Administrator;";
 static char public_consult_confirm_msg[] = "Confirm;";
 
 
+char ACS_DES_KEY[48] = {0};
+
 /*
 ** public information consult
 */
 void app_public_information_consult(int sockfd)
 {
+	char * token2 = NULL;
+	char *name =NULL,*value = NULL;
+	char *tmp = NULL,*token = NULL;
+	int package_length = 0;
+	char  buf[BUFFER_SIZE] = {0};
 	char recv_msg[1024] = {0};
 	int sendbytes,recvbytes;
     printf("entry app public information consult begin \n");
     //s1:receive server keys ack message
-    recvbytes = recv(sockfd,recv_msg,1024,0);
-    if(recvbytes < 0)
-    {
-    	perror("receive app keys ack message failed \n");
-    	return;
-    }
-    printf("acs receive app keys ack message is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
+    recvbytes = acs_tcp_receive(sockfd,buf,&package_length);
+	if(recvbytes < 0)
+	{
+		perror("receive app keys ack message failed in APP public info consult \n");
+		return ;
+	}
+#ifdef ACS_ENCRYPT_FLAG
+    //begin rsa decrypt
+	int encode_len;
+	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
+	//deseliaze_protocal_encode_data(buf,package_length,&encode_len);
+	encode_len = package_length -11;
+	tmp = js_public_decrypt(deseliaze_protocal_encode_data(buf,package_length,NULL),encode_len, ACS_IOS_PUBLIC_KEY);
+	printf("acs receive app des keys message is %s",tmp);
+	int first_flag = 1;
+	while((token = strsep(&tmp, ":")) != NULL)
+	{
+		if(first_flag)
+		{
+			printf("%s\n", token);
+			first_flag = 0;
+		}
+		//printf("%s\n", token);
+		if(strstr(token,"="))
+		{
+			name = strsep(&token, "=");
+			token2 = strsep(&token,";");
+			memcpy(ACS_DES_KEY,token2,strlen(token2));
+			printf("acs des key is %s\n",ACS_DES_KEY);
+		}
+	}
+	free(tmp);
+
+#else
+	printf("acs receive app keys des key message is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
+#endif
 	//s2:report keys update message
     if ((sendbytes =
 			send(sockfd,

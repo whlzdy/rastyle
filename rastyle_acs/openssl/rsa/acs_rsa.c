@@ -16,14 +16,41 @@
 #include<openssl/err.h>
 
 
-//#define PUBLIC_KEY "-----BEGIN RSA PUBLIC KEY-----\nMIGJAoGBAMCRXhLm/V5R9zcxEzQOOrX7l3fJMcSC65EGSdGEaDlxe+Gq4N9Iricu\n7/uguGUQY2JMCPYlduu6V8kq9/81c3sVw6joCjwMMXQVfn3akKfFQZEuLPggV8Qk\nXMp2RkTC/rD0KZE9zke4BnnYjBvJ2z402BKHec1n4YJQI9K+2MsBAgMBAAE=\n-----END RSA PUBLIC KEY-----\n"
-//#define PRIVATE_KEY "-----BEGIN RSA PRIVATE KEY-----\nMIICWwIBAAKBgQDAkV4S5v1eUfc3MRM0Djq1+5d3yTHEguuRBknRhGg5cXvhquDf\nSK4nLu/7oLhlEGNiTAj2JXbrulfJKvf/NXN7FcOo6Ao8DDF0FX592pCnxUGRLiz4\nIFfEJFzKdkZEwv6w9CmRPc5HuAZ52Iwbyds+NNgSh3nNZ+GCUCPSvtjLAQIDAQAB\nAoGAZg/l62DQIyCQRYlWIz3zciahthRFs2CsV9YcY9aoouF6BjZaLx3HZ+8htJ0P\nfkk8U4n3KfbbW78M7gs/G92JkWON5VZqbq1XdGUoYrgY6jQrVhsVBJPbtPN7dva3\noJvnE/vEwbE9zxREJMvPP8NHwqYBoCkklWHLyH8iX/4xOtECQQD09EICLG7eJMVC\nFlLqP1xFMQMiUJCTU8b2ieDX6atIHhBM0IgqW7GkICEGRuqQWqu2cWNq+s5Lobuh\nTcDYj9DtAkEAyUBdNDZO5STHFWhcOfCn9vogK4O66E6IDVsHBh7ufXOw7ZCFfY0S\nbOCRf2h2GBykSXAJEoLxafcp8aO++1yj5QJAAizhIS/P1D0zW0Djf50MbrjetEFO\n52AJFktnKcOzd7J8ppH7g5TI4RI/+NRMZPfJKpebMGoFxvoqtmYAXmv4iQJATk/L\ndOvFG4mKJpxrduhck9CVABnMe2VDr97CBvG2X/7K1Eaui0J/7vob4/YkLhHHJASC\noz9s7Y0ON0c+o9VSuQJATxw/hNXfO1X2F1+Nv5yB6v7jUERswBmc70k0iCdYAY8u\n1W5Z83lAV254WEmy5jFpMvnkyObxqqd6MeDJj7yDzA==\n-----END RSA PRIVATE KEY-----\n"
+
 
 //#define CLOUD_PRIVATE_KEY "-----BEGIN RSA PRIVATE KEY-----\nMIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJwGVAz6hDDQKPEhKndlq/fRs/DE\nUxHBIhlI075rQ7ZExjRVteYNnYbU4s20vR551TMPnWuuSaGk/Xg6vFhYPTqH4JhncUP8iRRWMrLA\nzuLdB5nQEx/3F3NL7XetGYfEcumnQO9gbFApftIt43Hsp8fff0wUGZQZfaN8SJPF+jI9AgMBAAEC\ngYBhO6hhtjVvXipFq0+VvOzgsfUblJ3YMK4ZZ8Ndpec6zb1fnBKR3eZPwpfdbkd1mKN/ALowAxur\n+vBjXudFfygYNy3aJwkA+vexvyUSmuoRCkVeRgqI133t6KAdP9ChRKzZhuqG096a2IVXMbLrg1aJ\nEc0ZhkYOMDLo7R3sr/8wAQJBAOyuJ5RQ236/89s3zpiVgHTLZvOhL8J+KXN6dGySlLjvs/5yOGKV\nokLzjBz7gIQcMgrsWLeXk6RahGcAsgSW0gECQQCowrxPx0nw5otu6khO6Amv3SvoQvW/CvUJA5eu\nGyg3CYUwos1qivTpHN6zAoMQWndaW77tPWnvUd/DVuOJOig9AkB6jYcjDmdJj31mwtPwQGF+mKAb\ngRgo3oj6KatFWPU3ea87DsvRiGe3wUKI81XNkof7Dfy2O/+QN+qdJ0gGhk4BAkB4WY/T0QqhGrib\nG8b/RqkJ2s+iLoZ0fIrsp7w29LUEMuziF2gor/oieG00+fif4/Qz4zPQmjh+7EOIWeGgjnH9AkEA\npoL8GlgMdrcNE33N5J8mYrPZl8T7os6CC0d5loEDYP88bObAIsjD0SaxODlGADaysfr0aqZ1ZjYp\n7rrdj7txpQ==\n-----END RSA PRIVATE KEY-----\n"
 
 
-//#define OPENSSLKEY "/home/whl/private.pem"
-//#define PUBLICKEY  "/home/whl/public.pem"
+#define PRIVATEKEY "-----BEGIN RSA PRIVATE KEY-----\n"\
+"MIICXgIBAAKBgQDFCHp1zloS2nCnLPbU1FtYc2EdSxSThEjefk/khTzFl5xx8JRf\n"\
+"rP0+RrPsXqzODC4H1nHxz/BZO9NZ3Onu2UGy+5PN8s3sQE3lKbuBJYkrEUdb7q+n\n"\
+"SPKtYvDQ04BhUU6opfbR6cyc0H/seDU7QSJeVyobQYUaXDiqlkTIL2oILwIDAQAB\n"\
+"AoGBAK6ywcHKYNrui4vutjwmvYdDZgwPEgNp+yIrZLL939BiiPgNk8DxJOkez1D4\n"\
+"8McQzY9teEIrWLQF83NuCI0aXMDCwcWNENkmQRW3Vv9vSv575/VnWf3bDODltyfQ\n"\
+"miiO41Y18xU0cyTTVPKzHGPr00MXJ3RAJqHnuiW6LOawnKDBAkEA7CwzANi0dSg5\n"\
+"2KYmCuQd/xM/janjTkEbzHzCmJUIZQJfJlu5R7J1A0IGunDwaUg9bm6TBzp62+3Y\n"\
+"kP7rSJBj5wJBANWTGIt5KhZZeqRUC0PDvcr/m6sXiosdS15p/InS1FzwyXdjXEUW\n"\
+"/tYiHZqYt25ixu+zJYJNJtAWCPc3X54ksHkCQQCfz6zXpsw99vFly9A0UHaH00OP\n"\
+"HeWlX2NrNQUM8NQUXc17DFhMztJlWPlqkd/srih7oLE3E/hs9/4y53zYxnQDAkEA\n"\
+"wmSfq5s+HpeVFGtW0XghkNp00xabSKICTs5DSSM3ndygU2WBv3T9wOPOdD9afkOz\n"\
+"9MrnciFNGYtk37dr9aJJaQJAWfBm33YzCMRNZdOq8vZ7YEhaSjIrvWU/JMRIJz+O\n"\
+"ndPo1DhnJBHZJpNvcXJxPuy3wv5XZuP6N5krMcYTpLvffQ==\n"\
+"-----END RSA PRIVATE KEY-----\n"
+
+#define PUBLICKEY  "-----BEGIN PUBLIC KEY-----\n"\
+"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZQy8Fa+AeEBSVuH0+qF1jFLvb\n"\
+"sZQadOlsgfFL0mTsAGNkg2XsSofUm7qTGZlbfAeDUnvwGryTLcc4aNFAAzMpsBkM\n"\
+"tun/53eTd4XXMFovjCrFBBvyJZPVqw9uVx1OJwNpI0aVveF4fRMjQI1P/bE+I6kc\n"\
+"D3GQPfNKXshHB9JaPQIDAQAB\n"\
+"-----END PUBLIC KEY-----\n"
+
+
+#define IOS_PRIVATE_KEY  "-----BEGIN RSA PRIVATE KEY-----\nMIICXQIBAAKBgQC5h1Pe6MGFb9ZV0u/HvzQ5RAq0m330USYWRcsqJtiE21uQpFSU\n0aaj8VLQ2rUn7RWbEnkXhPPlP67X9gnrnlNm4+Lo3ZnCpmfXfdDc92J22XoVP1TZ\nNn2054DqYdXTjvNrE20Cz6hhledjJixrG/IwCCc0zknRmFG3x3qYNCB8LQIDAQAB\nAoGAPS/ie0usN0PRHnD435mxsYk9Np9phOAWfZX7ESXKltZ5dlScCJC0MrFuLK9U\nu5w3WfNXuGgCwAKmuVbNosWOn3phDS0O9/kTQpitzm65SVfhD01zUB3tUPzDRn1M\nYb3xGujBGsyY1NVypQlNm3+Xkk/0YilbS23eAcIcGw4bZEkCQQDmskWwu3xEo0eV\n9/yP04d15gepgEyH76NZsg/i9joyp0yvWL7mA5OXZIxgqQWNm5uSFwjeWoo3ftUM\ndjfH9GyHAkEAzeDKC+qCdH2ekchaRlnBBF69gzpFvocR1law/J/jhmGqP6V02zjQ\n87ESqAN+aiE2EZe3Cc8NqN3hqcYJ7xGSqwJAcaZVitFyUOYXeBwpQjm1PDHMiIZ6\nLWWzFZcRGICw/w9ISgHwWaRda3HPbjcWU0Lbi0bpyZDVEq3bCz6aEFmrtQJBAMsI\nL1l3CPZG2DVex6BvbUmZAP5EXnmaDL47Okm4iJKDCHnB+y8ipfZdn09wOqABZqgM\n3abfudHaF2ztb+iDhQcCQQCVy9UJ/xvKG/fWZjbhbJBU3kBRnxv7QWwvxrP5T77f\nMJ1XriWNUqjh71+1mTY1FZFQvbLJd20/DgNIDcrpwTiw\n-----END RSA PRIVATE KEY-----\n"
+#define IOS_PUBLIC_KEY "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5h1Pe6MGFb9ZV0u/HvzQ5RAq0\nm330USYWRcsqJtiE21uQpFSU0aaj8VLQ2rUn7RWbEnkXhPPlP67X9gnrnlNm4+Lo\n3ZnCpmfXfdDc92J22XoVP1TZNn2054DqYdXTjvNrE20Cz6hhledjJixrG/IwCCc0\nzknRmFG3x3qYNCB8LQIDAQAB\n-----END PUBLIC KEY-----\n"
+
+#define TEST_KEY "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCBYSzK+e/J9DunFbuT417GakKJ\nS624BWi24hSx4DPKNRxUgGMsYYOCsaqg25PwQpNxhn1v+k2rAEX6MBQuskG2fbOm\nVY77cGEyqXgqQfaH/ohQeb145z696f6P9iohX4pCGtTyUdLBUSyjQkXk8lZpoiCa\n21+EqiQysbg3KdvLGQIDAQAB\n-----END PUBLIC KEY-----\n"
+
+
 #define BUFFSIZE 1024
 
 #define JSMIN(X, Y) (((X) < (Y)) ? (X) : (Y))
@@ -224,10 +251,6 @@ char *js_private_decrypt(const char *cipher_text,int length, char *private_key)
         // chunk length should be the size of privatekey (in bytes) minus 11 (overhead during encryption)
         //  printf("Result chunk: %s\nChunk length: %d\n", result_chunk, result_length);
         free(crypt_chunk);
-        if(result_length == -1)
-        {
-            break;
-        }
         // this is to omit the dummy character behind
         // i.e. Result chunk: ABC-1234567-201308101427371250-abcdefghijklmnopqrstuv\240Z
         //      Chunk length: 53
@@ -265,7 +288,8 @@ char *js_public_encrypt(const char *plain_text,int * length, char *public_key)
     //public_key = rsa_key_seliaze(public_key_str);
     BIO* p_bio = BIO_new_mem_buf(public_key, -1);
    // printf("rsa_encrypt is %p \n",p_bio);
-    rsa_publicKey = PEM_read_bio_RSAPublicKey(p_bio, NULL, NULL, NULL); //PEM_read_bio_RSAPrivateKey
+    //rsa_publicKey = PEM_read_bio_RSAPublicKey(p_bio, NULL, NULL, NULL); //PEM_read_bio_RSAPrivateKey
+    PEM_read_bio_RSA_PUBKEY(p_bio, &rsa_publicKey, NULL, NULL);
     if ( rsa_publicKey == NULL ) {
         printf("RSA is NULL\n");
         return NULL;
@@ -304,6 +328,7 @@ char *js_public_encrypt(const char *plain_text,int * length, char *public_key)
         unsigned char *result_chunk = calloc(rsa_public_len + 1,1);
         memset(result_chunk,0,rsa_public_len + 1);
         int result_length = RSA_public_encrypt(len, plain_chunk,result_chunk, rsa_publicKey, RSA_PKCS1_PADDING);
+
 //        printf("Plain char len: %d\n", i);
 
       //  printf("\n\n%ld,鍔犲瘑鍓嶆暟鎹�s \n", strlen((char *)plain_chunk), plain_chunk);
@@ -337,31 +362,40 @@ char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_ke
     RSA *rsa_publicKey = NULL;
     int rsa_public_len;
     int i;
-    //public_key = rsa_key_seliaze(public_key_str);
+    printf("js_public_decrypt public_key is %s \n",public_key);
     BIO* p_bio = BIO_new_mem_buf(public_key, -1);
+    //BIO* p_bio = BIO_new_mem_buf(public_key, strlen(public_key));
     // printf("rsa_encrypt is %p \n",p_bio);
-    rsa_publicKey = PEM_read_bio_RSAPublicKey(p_bio, NULL, NULL, NULL); //PEM_read_bio_RSAPrivateKey
+    //rsa_publicKey = PEM_read_bio_RSAPublicKey(p_bio, NULL, NULL, NULL); //PEM_read_bio_RSAPrivateKey PEM_read_RSA_PUBKEY()
+     //PEM_read_bio_RSAPublicKey(p_bio, &rsa_publicKey, 0, NULL); //PEM_read_bio_RSAPrivateKey PEM_read_RSA_PUBKEY()
+    printf("111\n");
+    PEM_read_bio_RSA_PUBKEY(p_bio, &rsa_publicKey, NULL, NULL);
     if ( rsa_publicKey == NULL ) {
 	   printf("RSA is NULL\n");
 	   return NULL;
     }
+    printf("222\n");
     // printf("Cipher text: %s\n", cipher_text);
     rsa_public_len = RSA_size(rsa_publicKey);
     //printf("RSA public length: %d\n", rsa_public_len);
-    size_t crypt_len = encode_len;
+    size_t crypt_len = (size_t)encode_len;
     char *crypt =(char *) cipher_text;
    // unsigned char *crypt = base64_decode(cipher_text, strlen(cipher_text), &crypt_len);
    // printf("Decoded cipher: %s\nCrypt length: %ld\n", crypt, crypt_len);
     // If no static, it will cause "address of stack memory associated with local variable ...", which mean the variable will released from memory after the end of this function
     char *plain_char = malloc(crypt_len);
+    printf("plain_char is %p,crypt_len is %ld",plain_char,(int)crypt_len);
     // initialize
+    printf("333\n");
     strcpy(plain_char, "");
     char *err = NULL;
     for ( i = 0; i < crypt_len; i += rsa_public_len) {
         unsigned char *crypt_chunk = malloc(rsa_public_len + 1);
+        printf("444\n");
         memcpy(&crypt_chunk[0], &crypt[i], rsa_public_len);
         //printf("Crypt chunk: %s\n", crypt_chunk);
         unsigned char *result_chunk = malloc(crypt_len + 1);
+        printf("555\n");
         int result_length = RSA_public_decrypt(rsa_public_len, crypt_chunk, result_chunk, rsa_publicKey, RSA_PKCS1_PADDING);
         // chunk length should be the size of publickey (in bytes) minus 11 (overhead during encryption)
        // printf("Result chunk: %s\nChunk length: %d\n", result_chunk, result_length);
@@ -376,6 +410,7 @@ char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_ke
         // by copying the chunk to a temporary variable with an extra length (i.e. in this case is 54)
         // and then set the last character of temporary variable to NULL
         char tmp_result[result_length + 1];
+        printf("666\n");
         memcpy(tmp_result, result_chunk, result_length);
         tmp_result[result_length] = '\0';
         //printf("New chunk: %s\n", tmp_result);
@@ -390,7 +425,7 @@ char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_ke
 
         strcat(plain_char, tmp_result);
     }
-
+    printf("777\n");
     RSA_free(rsa_publicKey);
    //free(crypt);
    // printf("Final result: %s\n", plain_char);
@@ -477,10 +512,11 @@ unsigned int get_file_size(const char *path)
 }
 
 static char fllepath[] = "/home/whl/encrydata";
-static char testpath[] = "/home/whl/e.data";
+static char testpath[] = "/home/whl/privateEncrypt.RSA";
+
 int main(void)
 {
-    char *source="hello rasyle!";
+    char *source="hello rasyle! ajfajfjalfjalsfjaklsjflajfasjflajslfdkjsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss;hello world";
     char *ptr_en,*ptr_de;
     int enc_len,dec_len;
     int filesize = 0;
@@ -488,69 +524,54 @@ int main(void)
     FILE *fp;
     int num;
     int i;
-    printf("source is,len si %d\n",strlen(source));
-   // ptr_en=rsa_encrypt_private(source,strlen(source),PRIVATE_KEY,0,&enc_len); //PRIVATE_KEY PUBLIC_KEY
-    system("date");
-    for(i= 0;i<1000;i++)
-    {
-    	ptr_en=js_public_encrypt(source,&enc_len); //PRIVATE_KEY PUBLIC_KEY
-        ptr_de=js_private_decrypt(ptr_en,enc_len);
-        if(ptr_en!=NULL)
-        {
-		   free(ptr_en);
-        }
-        if(ptr_de!=NULL)
-        {
-		   free(ptr_de);
-        }
-        printf("%d\n",i);
-    }
-    system("date");
-    printf("sucessful \n");
-    return 0;
-   //   ptr_en=js_public_encrypt(source,&enc_len); //PRIVATE_KEY PUBLIC_KEY
+    //printf("source is,len si %d\n",strlen(source));
+    //ptr_en=rsa_encrypt_private(source,strlen(source),PRIVATEKEY,0,&enc_len); //PRIVATE_KEY PUBLIC_KEY
+   // ptr_en=js_private_encrypt(source,&enc_len,IOS_PRIVATE_KEY); //PRIVATE_KEY PUBLIC_KEY
+   // ptr_de=js_public_decrypt(ptr_en, enc_len,TEST_KEY); //PRIVATE_KEY PUBLIC_KEY
      //ptr_en=rsa_encrypt_public(source,strlen(source),PUBLIC_KEY,0,&enc_len);
-
+   // printf("after decrypt:%s\n",ptr_de);
+   // return 0;
 
 	//if((fp = fopen(fllepath, "w+r"))==NULL)
-	//{
+	////{
 	//	printf("cant open the file \n");
 	//	exit(0);
 	//}
 
-    // fwrite(ptr_en, sizeof(char), enc_len, fp);
+   // fwrite(ptr_en, sizeof(char), enc_len, fp);
 
-    // fclose(fp);
-   // filesize =  get_file_size(testpath);
-    //encode_data =(unsigned char *) malloc(filesize);
-    //printf("file size is %d \n",filesize);
+//    fclose(fp);
 
- 	//if((fp = fopen(testpath, "r+b"))==NULL)
- 	//{
- 	//	printf("cant open the file \n");
- 	//	exit(0);
- 	//}
 
- 	 //num = fread(encode_data, sizeof(unsigned char), filesize, fp);
- 	// if(num != filesize)
- 	 //{
- 	//	 printf("read failed num is %d \n",num);
- 	//	 fclose(fp);
- 	//	 return -1;
- 	 //}
+    filesize =  get_file_size(testpath);
+    encode_data =(unsigned char *) malloc(filesize);
+    printf("file size is %d \n",filesize);
 
-    //fclose(fp);
-    //ptr_en=my_private_encrypt(source,OPENSSLKEY);
+ 	if((fp = fopen(testpath, "r+b"))==NULL)
+    {
+ 		printf("cant open the file \n");
+ 		exit(0);
+ 	}
+ 	 num = fread(encode_data, sizeof(unsigned char), filesize, fp);
+ 	 if(num != filesize)
+ 	 {
+ 		 printf("read failed num is %d \n",num);
+ 		 fclose(fp);
+ 		 return -1;
+ 	 }
+    fclose(fp);
+   // ptr_en=my_private_encrypt(source,OPENSSLKEY);
     //printf("after encrypt:%s,encrypt len is %d\n",ptr_en,strlen(ptr_en));
     //ptr_de=rsa_decrypt_public(ptr_en,strlen(ptr_en),PUBLIC_KEY,0,&dec_len);
-    ptr_de=js_private_decrypt(ptr_en,enc_len);
+    ptr_de = js_public_decrypt(encode_data, filesize, PUBLICKEY);
+   // ptr_de=js_private_decrypt(ptr_en,enc_len);
    // ptr_de=js_private_decrypt(encode_data,filesize);
    // ptr_de=rsa_decrypt_private(ptr_en,strlen(ptr_en),PRIVATE_KEY,0,&dec_len);
    // ptr_de=my_public_decrypt(ptr_en,PUBLICKEY);
     printf("after decrypt:%s\n",ptr_de);
     if(ptr_en!=NULL)
     {
-        free(ptr_en);
+        //free(ptr_en);
     }   
     if(ptr_de!=NULL)
     {

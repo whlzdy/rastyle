@@ -15,7 +15,7 @@
 
 
 //global variables
-#define RASTYLE_ACS_CLIENT_IPADDR  "120.27.50.217" // "192.168.100.195"
+#define RASTYLE_ACS_CLIENT_IPADDR  "192.168.210.17" // "120.27.50.217"
 #define RASTYLE_ACS_CLIENT_PORT     8023           //8023
 
 
