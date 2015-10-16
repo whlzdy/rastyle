@@ -32,6 +32,7 @@
 #include "../hal/zigbee/sensor.h"
 #include "../device_control/device_control.h"
 #include "../sqlite/sqlite.h"
+#include "../openssl/des/acs_des.h"
 
 
 
@@ -46,9 +47,9 @@ static char confirm_msg[] = "Confirm;";
 static char fail_msg[] = "Fail;";
 
 
-extern void acs_client_abnormal_mode_handle(int sockfd,char * data,int length);
-extern void acs_real_time_handle(int sockfd,char * data,int length);
-extern void acs_normal_mode_report(int sockfd,char * data,int length);
+extern void acs_client_abnormal_mode_handle(int sockfd,char * data,int length,eEncodeType encode_type);
+extern void acs_real_time_handle(int sockfd,char * data,int length,eEncodeType encode_type);
+extern void acs_normal_mode_report(int sockfd,char * data,int length,eEncodeType encode_type);
 
 
 
@@ -152,8 +153,11 @@ void *acs_client_thread(void *args)
 	char recv_msg[65536] = {0};
 	char buffer[65536] = {0};
 	int rc;
+	char des_key[64] = {0};
+	char * plaintext = NULL;
 	sleep(5);
 Reconnetion:
+	memset(des_key,0,64);
 	/*address resolution */
 	if ((host = gethostbyname(RASTYLE_ACS_CLIENT_IPADDR)) == NULL)
 	{
@@ -183,34 +187,63 @@ Reconnetion:
 	    goto Reconnetion;
 	}
     // set_keepalive(sockfd,1,5,5,5);//5,5,5
-    // bind to sensor thread
-    acs_client_bind2_sensor(sockfd,acs_normal_mode_report,acs_client_abnormal_mode_handle,acs_real_time_handle);
 	printf("socket sucessful to connect to server\n");
     build_acs_connection(sockfd);
 	printf("acs connetion completed \n");
-	//public_information_consult(sockfd);
+	//random create 64 deskey
+	strcat(des_key,"ajHL823iasdfUIKadfg");
+	public_information_consult(sockfd,des_key);
 	//update user table
-	//acs_update_user_from_cloud(sockfd);
+	acs_update_user_from_cloud(sockfd);
 	printf("public information consult  completed \n");
+	// bind to sensor thread
+	acs_client_bind2_sensor(sockfd,acs_normal_mode_report,acs_client_abnormal_mode_handle,acs_real_time_handle,des_key);
 	acs_client_mode |= 0x01; //active normal mode
 	while(1)
 	{
-		printf("acs client is waiting receive data ...\n");
+		//printf("acs client is waiting receive data ...\n");
 		memset(recv_msg,0,65536);
 		//recvbytes = recv(sockfd, recv_msg, sizeof(recv_msg), MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg,&packlength );
-		if(recvbytes < -1)
+		//printf("recvbytes is %d \n",recvbytes);
+		if(recvbytes == -1 )
 		{
-			TusSleep(10000);
+			perror("acs receved server message ack failed \n");
+			handle_socket_reconnection();
+			goto Reconnetion;
+		}
+		if(packlength <= 0)
+		{
 			continue;
 		}
-		else if(recvbytes == -1)
-		{
-			 handle_socket_reconnection();
-			 goto Reconnetion;
-		}
-		memset(buffer,0,sizeof(buffer));
-		memcpy(buffer,deseliaze_protocal_data(recv_msg,packlength),strlen(deseliaze_protocal_data(recv_msg,packlength))-1);//delete end flag
+		int encode_len = 0;
+		memset(buffer,0,65536);
+        if((recv_msg[3] & 0xff) == 0x03)
+        {
+            //encrypt
+        	//printf("recvbytes is %d \n",packlength);
+        	encode_len = packlength - 11;
+        	plaintext = (char *)js_public_decrypt(
+			          deseliaze_protocal_encode_data(recv_msg,packlength,NULL),
+			          encode_len,
+			          CLOUD_PUBLIC_KEY
+			          );
+        	memcpy(buffer,plaintext,strlen(plaintext));
+        	free(plaintext);
+        }
+        else if((recv_msg[3] & 0xff) == 0x01)
+        {
+        	encode_len = packlength - 11;
+        	plaintext = DES_Decrypt(des_key,deseliaze_protocal_encode_data(recv_msg,packlength,NULL),encode_len);
+        	memcpy(buffer,plaintext,strlen(plaintext));
+        	free(plaintext);
+        }
+        else
+        {
+        	printf("packlength is %d \n",packlength);
+        	//no encrypt
+        	memcpy(buffer,deseliaze_protocal_data(recv_msg,packlength),packlength-11);
+        }
 		printf("cloud control message is %s len is %d\n",buffer,strlen(buffer));
 		 //need check username  query user table
 		if(strcmp(buffer,"Apply_for_control_authority;") == 0)

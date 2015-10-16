@@ -130,7 +130,7 @@ int acs_get_wind_motor_frame(uint8_t * data,uint8_t length)
 					memcpy(acs_protocal_frame+offset,buffer,ret);
 					offset += ret;
 					receive_flag = 1;
-					printf("start ,offset is %d\n",offset);
+					//printf("start ,offset is %d\n",offset);
 					continue;
 				}
 				//end flag
@@ -140,7 +140,7 @@ int acs_get_wind_motor_frame(uint8_t * data,uint8_t length)
 					memcpy(acs_protocal_frame+offset,buffer,ret);
 					offset += ret;
 					receive_flag = 0;
-					printf("end ,offset is %d\n",offset);
+					//printf("end ,offset is %d\n",offset);
 					goto handle_whole_data;
 				}
 				if(receive_flag)
@@ -149,7 +149,7 @@ int acs_get_wind_motor_frame(uint8_t * data,uint8_t length)
 					//receive body data
 					memcpy(acs_protocal_frame+offset,buffer,ret);
 					offset+=ret;
-					printf("reciveing... ,offset is %d\n",offset);
+					//printf("reciveing... ,offset is %d\n",offset);
 					continue;
 				}
 			 }

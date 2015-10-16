@@ -127,7 +127,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 							MSG_NOSIGNAL);
 				if(rc == -1)
 				{
-					 printf("sockfd is %d left as send failed 2 ",sockfd);
+					 printf("sockfd is %d left as send failed 100 \n",sockfd);
 					 close(sockfd);
 				}
 				return;
@@ -170,7 +170,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 		}
 
 	}
-	printf("data hanlde over end while \n");
+	//printf("data hanlde over end while \n");
 	//handle data to sqlite
 	if(strcmp(order_msg,"CONCL_PLMOD") == 0)
 	{
@@ -189,7 +189,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 	else if(strcmp(order_msg,"CONCL_PLDEL") == 0)
 	{
 		printf( "CONCL_PLDEL handle entry \n");
-		fprintf(stderr,"CONCL_PLDEL sensor_data_list[0].data is %s \n",sensor_data_list[0].data);
+		//fprintf(stderr,"CONCL_PLDEL sensor_data_list[0].data is %s \n",sensor_data_list[0].data);
 		if(strcmp(sensor_data_list[0].data,"realtime") == 0)
 		{
 			printf("app could not delete realtime plan task \n");
@@ -198,7 +198,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 		else
 		{
 			sprintf(sSQL,"delete from %s where Planname = '%s';",ACS_PLAN_TASK,sensor_data_list[0].data);
-			fprintf(stderr,"CONCL_PLDEL sql is %s \n",sSQL);
+			//fprintf(stderr,"CONCL_PLDEL sql is %s \n",sSQL);
 		}
 	}
 	else if(strcmp(order_msg,"CONCL_PLADD") == 0)
@@ -214,7 +214,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 			//"create table acs_plan_task (Planname varchar(20) PRIMARY KEY,Cycle varchar(20),STATE varchar(20),beginningtime datetime ,Stoptime datetime);";
 			sprintf(sSQL,"insert into %s (Planname,Cycle,STATE,beginningtime,Stoptime,Objectadd1,Objectadd2,Objectadd3)values('%s','%s','%s','%s','%s','0x001C','0x001D','0x001E');",ACS_PLAN_TASK,sensor_data_list[0].data, \
 							sensor_data_list[1].data,sensor_data_list[2].data,sensor_data_list[3].data,sensor_data_list[4].data);
-			fprintf(stderr,"CONCL_PLADD sql is %s \n",sSQL);
+			//fprintf(stderr,"CONCL_PLADD sql is %s \n",sSQL);
 		}
 	}
 	else if(strcmp(order_msg,"CONCL_CLDEL")==0)
@@ -236,7 +236,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 		// "create table acs_climate_data_table (Climatename varchar(20) PRIMARY KEY,CO2Concentration varchar(20),Temperature varchar(20),Humidity varchar(20));";
 		sprintf(sSQL,"insert into %s values('%s','%s','%s','%s');",ACS_CLIMATE_DATA,sensor_data_list[0].data, \
 				sensor_data_list[1].data,sensor_data_list[2].data,sensor_data_list[3].data);
-		fprintf(stderr,"CONCL_CLADD sql is %s \n",sSQL);
+		//fprintf(stderr,"CONCL_CLADD sql is %s \n",sSQL);
 		//acs_sqlite_exec_sql(ACS_CONFIG_DATEBASE,sSQL);
 	}
 	else if(strcmp(order_msg,"CONCL_SMCHI")==0)
@@ -256,7 +256,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 
 		sprintf(sSQL,"update  %s set volume1 = '%s' where Planname = '%s' and Objectadd1 = '%s';",ACS_PLAN_TASK, \
 				sensor_data_list[2].data,sensor_data_list[0].data,sensor_data_list[1].data);
-		printf("CONCL_FANCR sql is %s \n",sSQL);
+		//printf("CONCL_FANCR sql is %s \n",sSQL);
 		//acs_sqlite_exec_sql(ACS_CONFIG_DATEBASE,sSQL);
 		//control wind motor
 	    if(strcmp(sensor_data_list[0].data,"realtime") == 0)
@@ -319,7 +319,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 					MSG_NOSIGNAL);
 		if(rc == -1)
 		{
-			 printf("sockfd is %d left as send failed 2 ",sockfd);
+			 printf("sockfd is %d left as send failed 101 \n ",sockfd);
 			 close(sockfd);
 		}
         if(strcmp(sensor_data_list[1].data,"ACTIVE") == 0)
@@ -337,7 +337,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 		printf( "CONAU_USADD handle entry \n");
 		sprintf(sSQL,"insert into %s values('%s','%s','%s','%s','%s');",ACS_USER_DATA,sensor_data_list[1].data, \
 						sensor_data_list[0].data,sensor_data_list[2].data,sensor_data_list[3].data,sensor_data_list[4].data);
-		fprintf(stderr,"CONAU_USADD sql is %s \n",sSQL);
+		//fprintf(stderr,"CONAU_USADD sql is %s \n",sSQL);
 	}
 	else if(strcmp(order_msg,"CONAU_USMOD") == 0)
 	{
@@ -352,13 +352,13 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 			sprintf(sSQL,"update %s set PWD = '%s',Publickey = '%s' where Username = '%s';",ACS_USER_DATA,sensor_data_list[1].data,\
 											sensor_data_list[2].data,sensor_data_list[0].data);
 		}
-		fprintf(stderr,"CONAU_USMOD sql is %s \n",sSQL);
+		//fprintf(stderr,"CONAU_USMOD sql is %s \n",sSQL);
 	}
 	else if(strcmp(order_msg,"CONAU_USDEL") == 0)
 	{
 		printf( "CONAU_USDEL handle entry \n");
 		sprintf(sSQL,"delete from %s where Username = '%s';",ACS_USER_DATA,sensor_data_list[0].data);
-		fprintf(stderr,"CONAU_USDEL sql is %s \n",sSQL);
+		//fprintf(stderr,"CONAU_USDEL sql is %s \n",sSQL);
 	}
 	acs_sqlite_exec_sql(ACS_CONFIG_DATEBASE,sSQL);
 	//printf("acs receive app data is %s \n",deseliaze_protocal_data((uint8_t *)recv_msg,recvbytes));
@@ -368,7 +368,7 @@ void acs_handle_device_crontrol(int sockfd,char * buffer)
 			MSG_NOSIGNAL);
 	if(rc == -1)
 	{
-		 printf("sockfd is %d left as send failed 2 ",sockfd);
+		 printf("sockfd is %d left as send failed 102 ",sockfd);
 		 close(sockfd);
 	}
 }

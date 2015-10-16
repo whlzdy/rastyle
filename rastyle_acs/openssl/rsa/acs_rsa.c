@@ -15,6 +15,8 @@
 #include<openssl/bio.h>
 #include<openssl/err.h>
 
+#include "../../systemconfig.h"
+
 
 
 
@@ -48,8 +50,15 @@
 #define IOS_PRIVATE_KEY  "-----BEGIN RSA PRIVATE KEY-----\nMIICXQIBAAKBgQC5h1Pe6MGFb9ZV0u/HvzQ5RAq0m330USYWRcsqJtiE21uQpFSU\n0aaj8VLQ2rUn7RWbEnkXhPPlP67X9gnrnlNm4+Lo3ZnCpmfXfdDc92J22XoVP1TZ\nNn2054DqYdXTjvNrE20Cz6hhledjJixrG/IwCCc0zknRmFG3x3qYNCB8LQIDAQAB\nAoGAPS/ie0usN0PRHnD435mxsYk9Np9phOAWfZX7ESXKltZ5dlScCJC0MrFuLK9U\nu5w3WfNXuGgCwAKmuVbNosWOn3phDS0O9/kTQpitzm65SVfhD01zUB3tUPzDRn1M\nYb3xGujBGsyY1NVypQlNm3+Xkk/0YilbS23eAcIcGw4bZEkCQQDmskWwu3xEo0eV\n9/yP04d15gepgEyH76NZsg/i9joyp0yvWL7mA5OXZIxgqQWNm5uSFwjeWoo3ftUM\ndjfH9GyHAkEAzeDKC+qCdH2ekchaRlnBBF69gzpFvocR1law/J/jhmGqP6V02zjQ\n87ESqAN+aiE2EZe3Cc8NqN3hqcYJ7xGSqwJAcaZVitFyUOYXeBwpQjm1PDHMiIZ6\nLWWzFZcRGICw/w9ISgHwWaRda3HPbjcWU0Lbi0bpyZDVEq3bCz6aEFmrtQJBAMsI\nL1l3CPZG2DVex6BvbUmZAP5EXnmaDL47Okm4iJKDCHnB+y8ipfZdn09wOqABZqgM\n3abfudHaF2ztb+iDhQcCQQCVy9UJ/xvKG/fWZjbhbJBU3kBRnxv7QWwvxrP5T77f\nMJ1XriWNUqjh71+1mTY1FZFQvbLJd20/DgNIDcrpwTiw\n-----END RSA PRIVATE KEY-----\n"
 #define IOS_PUBLIC_KEY "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5h1Pe6MGFb9ZV0u/HvzQ5RAq0\nm330USYWRcsqJtiE21uQpFSU0aaj8VLQ2rUn7RWbEnkXhPPlP67X9gnrnlNm4+Lo\n3ZnCpmfXfdDc92J22XoVP1TZNn2054DqYdXTjvNrE20Cz6hhledjJixrG/IwCCc0\nzknRmFG3x3qYNCB8LQIDAQAB\n-----END PUBLIC KEY-----\n"
 
-#define TEST_KEY "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCBYSzK+e/J9DunFbuT417GakKJ\nS624BWi24hSx4DPKNRxUgGMsYYOCsaqg25PwQpNxhn1v+k2rAEX6MBQuskG2fbOm\nVY77cGEyqXgqQfaH/ohQeb145z696f6P9iohX4pCGtTyUdLBUSyjQkXk8lZpoiCa\n21+EqiQysbg3KdvLGQIDAQAB\n-----END PUBLIC KEY-----\n"
+#define TEST_KEY "-----BEGIN PUBLIC KEY-----\n"\
+"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5G/QDl6FxjRQErChEBFWsHwJO\n"\
+"XiR3VCa1JceiYJpPNzO+WfGMo50ezGCMnSatXrUXSw7FKDZ14RU3bFKp9Er0isD7\n"\
+"AwgLjcXUzMLbC7EWvu1j0JM/KkQWn12C5hQ54XiooKRibVduon6NtvQtOvh2T7HK\n"\
+"CpNZQN5CM59uojLAUwIDAQAB\n"\
+"-----END PUBLIC KEY-----\n"
 
+
+#define LIURUIKEY "-----BEGIN PUBLIC KEY-----\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCdZga7+ctcmDyMqB7yqNhU8hYM\nlp/F/TOaFxxd9qo9+eMlF5eATn6Cy52En3YcWTfN2Jp9itvBv5agnY9vHc5ZvjmG\n2Gh4NpiTF7L/b8zGrF9POiAzjQfxqkurSFLniXIDf2HRwwu3ojPbbTdvyfWC8Kio\nxTzA1KqKjA3hDO/DwQIDAQAB\n-----END PUBLIC KEY-----\n"
 
 #define BUFFSIZE 1024
 
@@ -213,7 +222,7 @@ char* rsa_encrypt_public(unsigned char*txt,int txt_len,char* public_key_str,int 
 /*
  * js private key decrypt
 */
-char *js_private_decrypt(const char *cipher_text,int length, char *private_key)
+char * js_private_decrypt(const char *cipher_text,int length, char *private_key)
 {
     RSA *rsa_privateKey = NULL;
     int rsa_private_len;
@@ -280,7 +289,7 @@ char *js_private_decrypt(const char *cipher_text,int length, char *private_key)
 /*
  * js pubilc key encrypt
 */
-char *js_public_encrypt(const char *plain_text,int * length, char *public_key)
+char * js_public_encrypt(const char *plain_text,int * length, char *public_key)
 {
     RSA *rsa_publicKey = NULL;
     int rsa_public_len;
@@ -357,24 +366,24 @@ char *js_public_encrypt(const char *plain_text,int * length, char *public_key)
 /*
  * js public decrypt
 */
-char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_key)
+char * js_public_decrypt(const char *cipher_text, int encode_len, char *public_key)
 {
     RSA *rsa_publicKey = NULL;
     int rsa_public_len;
     int i;
-    printf("js_public_decrypt public_key is %s \n",public_key);
+    //printf("js_public_decrypt public_key is %s \n",public_key);
     BIO* p_bio = BIO_new_mem_buf(public_key, -1);
     //BIO* p_bio = BIO_new_mem_buf(public_key, strlen(public_key));
     // printf("rsa_encrypt is %p \n",p_bio);
     //rsa_publicKey = PEM_read_bio_RSAPublicKey(p_bio, NULL, NULL, NULL); //PEM_read_bio_RSAPrivateKey PEM_read_RSA_PUBKEY()
      //PEM_read_bio_RSAPublicKey(p_bio, &rsa_publicKey, 0, NULL); //PEM_read_bio_RSAPrivateKey PEM_read_RSA_PUBKEY()
-    printf("111\n");
+    //printf("111\n");
     PEM_read_bio_RSA_PUBKEY(p_bio, &rsa_publicKey, NULL, NULL);
     if ( rsa_publicKey == NULL ) {
 	   printf("RSA is NULL\n");
 	   return NULL;
     }
-    printf("222\n");
+    //printf("222\n");
     // printf("Cipher text: %s\n", cipher_text);
     rsa_public_len = RSA_size(rsa_publicKey);
     //printf("RSA public length: %d\n", rsa_public_len);
@@ -384,19 +393,19 @@ char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_ke
    // printf("Decoded cipher: %s\nCrypt length: %ld\n", crypt, crypt_len);
     // If no static, it will cause "address of stack memory associated with local variable ...", which mean the variable will released from memory after the end of this function
     char *plain_char = malloc(crypt_len);
-    printf("plain_char is %p,crypt_len is %ld",plain_char,(int)crypt_len);
+    //printf("plain_char is %p,crypt_len is %ld",plain_char,(int)crypt_len);
     // initialize
-    printf("333\n");
+    //printf("333\n");
     strcpy(plain_char, "");
     char *err = NULL;
     for ( i = 0; i < crypt_len; i += rsa_public_len) {
         unsigned char *crypt_chunk = malloc(rsa_public_len + 1);
-        printf("444\n");
+       // printf("444\n");
         memcpy(&crypt_chunk[0], &crypt[i], rsa_public_len);
         //printf("Crypt chunk: %s\n", crypt_chunk);
         unsigned char *result_chunk = malloc(crypt_len + 1);
-        printf("555\n");
-        int result_length = RSA_public_decrypt(rsa_public_len, crypt_chunk, result_chunk, rsa_publicKey, RSA_PKCS1_PADDING);
+       // printf("555\n");
+        int result_length = RSA_public_decrypt(rsa_public_len, crypt_chunk, result_chunk, rsa_publicKey, RSA_PKCS1_PADDING);//RSA_NO_PADDING RSA_PKCS1_PADDING
         // chunk length should be the size of publickey (in bytes) minus 11 (overhead during encryption)
        // printf("Result chunk: %s\nChunk length: %d\n", result_chunk, result_length);
 
@@ -410,7 +419,7 @@ char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_ke
         // by copying the chunk to a temporary variable with an extra length (i.e. in this case is 54)
         // and then set the last character of temporary variable to NULL
         char tmp_result[result_length + 1];
-        printf("666\n");
+        //printf("666\n");
         memcpy(tmp_result, result_chunk, result_length);
         tmp_result[result_length] = '\0';
         //printf("New chunk: %s\n", tmp_result);
@@ -425,7 +434,7 @@ char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_ke
 
         strcat(plain_char, tmp_result);
     }
-    printf("777\n");
+    //printf("777\n");
     RSA_free(rsa_publicKey);
    //free(crypt);
    // printf("Final result: %s\n", plain_char);
@@ -436,7 +445,7 @@ char *js_public_decrypt(const char *cipher_text, int encode_len, char *public_ke
 /*
  * js private key encrypt
 */
-char *js_private_encrypt(const char *plain_text,int * encode_len ,char *private_key)
+char * js_private_encrypt(const char *plain_text,int * encode_len ,char *private_key)
 {
 	RSA *rsa_privateKey = NULL;
 	int rsa_private_len;
@@ -469,11 +478,13 @@ char *js_private_encrypt(const char *plain_text,int * encode_len ,char *private_
         // this must less than rsa_private_len - 11
         int len = JSMIN(remaining_char_count, chunk_length);
         unsigned char *plain_chunk = malloc(len + 1);
+        memset(plain_chunk,0,len + 1);
         // take out chunk of plain text
         memcpy(&plain_chunk[0], &plain_text[i], len);
        // printf("Plain chunk: %s\n", plain_chunk);
         unsigned char *result_chunk = malloc(rsa_private_len + 1);
-        int result_length = RSA_private_encrypt(len, plain_chunk, result_chunk, rsa_privateKey, RSA_PKCS1_PADDING);
+        memset(result_chunk,0,rsa_private_len + 1);
+        int result_length = RSA_private_encrypt(len, plain_chunk, result_chunk, rsa_privateKey, RSA_PKCS1_PADDING); // RSA_NO_PADDING RSA_PKCS1_PADDING
        // printf("Encrypted Result chunk: %s\nEncrypted Chunk length: %d\n", result_chunk, result_length);
         free(plain_chunk);
         if (result_length == -1) {
@@ -498,6 +509,7 @@ char *js_private_encrypt(const char *plain_text,int * encode_len ,char *private_
 }
 
 #if 0
+
 unsigned int get_file_size(const char *path)
 {
     unsigned int filesize = -1;
@@ -511,8 +523,11 @@ unsigned int get_file_size(const char *path)
     return filesize;
 }
 
-static char fllepath[] = "/home/whl/encrydata";
-static char testpath[] = "/home/whl/privateEncrypt.RSA";
+static char fllepath[] = "/home/whl/noHeader.data";
+static char testpath[] = "/home/whl/ecodata";
+
+
+
 
 int main(void)
 {
@@ -520,13 +535,14 @@ int main(void)
     char *ptr_en,*ptr_de;
     int enc_len,dec_len;
     int filesize = 0;
-    unsigned char *encode_data;
+    unsigned char *encode_data = NULL;
     FILE *fp;
     int num;
     int i;
     //printf("source is,len si %d\n",strlen(source));
     //ptr_en=rsa_encrypt_private(source,strlen(source),PRIVATEKEY,0,&enc_len); //PRIVATE_KEY PUBLIC_KEY
-   // ptr_en=js_private_encrypt(source,&enc_len,IOS_PRIVATE_KEY); //PRIVATE_KEY PUBLIC_KEY
+     printf("begin private encrypte  ...\n");
+     ptr_en=js_private_encrypt(source,&enc_len,ACS_PRIVATE_KEY); //PRIVATE_KEY PUBLIC_KEY
    // ptr_de=js_public_decrypt(ptr_en, enc_len,TEST_KEY); //PRIVATE_KEY PUBLIC_KEY
      //ptr_en=rsa_encrypt_public(source,strlen(source),PUBLIC_KEY,0,&enc_len);
    // printf("after decrypt:%s\n",ptr_de);
@@ -542,12 +558,13 @@ int main(void)
 
 //    fclose(fp);
 
-
-    filesize =  get_file_size(testpath);
+#if 0
+    printf("fllepath is %s \n",fllepath);
+    filesize =  get_file_size(fllepath);
     encode_data =(unsigned char *) malloc(filesize);
     printf("file size is %d \n",filesize);
 
- 	if((fp = fopen(testpath, "r+b"))==NULL)
+ 	if((fp = fopen(fllepath, "r+b"))==NULL)
     {
  		printf("cant open the file \n");
  		exit(0);
@@ -560,10 +577,12 @@ int main(void)
  		 return -1;
  	 }
     fclose(fp);
+#endif
    // ptr_en=my_private_encrypt(source,OPENSSLKEY);
     //printf("after encrypt:%s,encrypt len is %d\n",ptr_en,strlen(ptr_en));
     //ptr_de=rsa_decrypt_public(ptr_en,strlen(ptr_en),PUBLIC_KEY,0,&dec_len);
-    ptr_de = js_public_decrypt(encode_data, filesize, PUBLICKEY);
+    printf("begin public decrypt  ...\n");
+    ptr_de = js_public_decrypt(ptr_en, enc_len, ACS_PUBLIC_KEY);
    // ptr_de=js_private_decrypt(ptr_en,enc_len);
    // ptr_de=js_private_decrypt(encode_data,filesize);
    // ptr_de=rsa_decrypt_private(ptr_en,strlen(ptr_en),PRIVATE_KEY,0,&dec_len);

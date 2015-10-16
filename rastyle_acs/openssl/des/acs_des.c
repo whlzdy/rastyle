@@ -29,7 +29,7 @@ char * DES_Encrypt(const char * key,const char * cleartext, int * encode_size)
 	{
 		*encode_size = encode_len;
 	}
-	printf("encode_len is %d \n",encode_len);
+	//printf("encode_len is %d \n",encode_len);
 	strCipherText = malloc(encode_len);
 	memset(keyEncrypt, 0, 8);
 	memset(strCipherText,0,size);
@@ -72,7 +72,7 @@ char * DES_Decrypt(const char * key,const char * ciphertext, int size)
 	DES_cblock keyEncrypt;
 	memset(keyEncrypt, 0, 8);
 	memset(strClearText,0,size);
-	printf("decode size is %d \n",size);
+	//printf("decode size is %d \n",size);
 	if (key_len <= 8)
 		memcpy(keyEncrypt, key, key_len);
 	else

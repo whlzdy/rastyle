@@ -25,7 +25,7 @@
 
 //build connect setups use to test
 //char setup_connect_msg[] = "INFPL_CONRQ:Linux 3.2,1514.564,2514.325,Fresh_air_system,qwierygd8123asdfkoe;";
-//char setup_confim_msg[]  = "INFEX_SAFTE:INF=ALSKDFJEOIRTU01Q89234UERT0UAQWIOWUDEFJJQOWIEJFROIDJFFOVIQWUE8RUOUWIQUWER2322039;";
+char setup_confim_msg[]  = "INFEX_SAFTE:INF=ALSKDFJEOIRTU01Q89234UERT0UAQWIOWUDEFJJQOWIEJFROIDJFFOVIQWUE8RUOUWIQUWER2322039;";
 char setup_ack_msg[] = "Confirm;";
 
 
@@ -50,6 +50,7 @@ void build_acs_connection(int sockfd)
 {
 	int packlength = 0,encode_length = 0,tmp = 0;
 	int sendbytes,recvbytes;
+	char verystr[48] = {0};
 	char *plain_text = NULL,*cipher_text = NULL;
 	char  buf[BUFFER_SIZE] = {0} ;
 	//build acs connect
@@ -73,30 +74,36 @@ void build_acs_connection(int sockfd)
 		return ;
 	}
 	//s3:cloud_pubic_key decrypt and acs_private encry
-	deseliaze_protocal_encode_data(buf,packlength,&encode_length);
-	printf("encode_length is %d \n",encode_length);
-	FILE *fp;
-	if((fp = fopen("/home/whl/rsa.data", "w+r"))==NULL)
-	{
-		printf("cant open the file \n");
-		exit(0);
-	}
-	fwrite(deseliaze_protocal_encode_data(buf,packlength,&encode_length), sizeof(char), encode_length, fp);
-	fclose(fp);
-	plain_text = js_public_decrypt(deseliaze_protocal_encode_data(buf,packlength,&tmp),encode_length,CLOUD_PUBLIC_KEY);//TEST_KEY CLOUD_PUBLIC_KEY
-	printf("acs receive cloud decrypt plain text is %s \n",plain_text);
+#ifdef ACS_ENCRYPT_FLAG
+	deseliaze_protocal_encode_data(buf,packlength,(uint16_t *)&encode_length);
+	//printf("encode_length is %d \n",encode_length);
+	plain_text = js_public_decrypt(deseliaze_protocal_encode_data(buf,packlength,(uint16_t *)&tmp),encode_length,CLOUD_PUBLIC_KEY);//TEST_KEY CLOUD_PUBLIC_KEY
+	//printf("acs receive cloud decrypt plain text is %s \n",plain_text);
 	//acs decryption
 	tmp = 0;
 	cipher_text = js_private_encrypt(plain_text,&tmp,ACS_PRIVATE_KEY);
+	//printf("after enrypt encode_length is %d \n",tmp);
 	free(plain_text);
 	if ((sendbytes = send(sockfd,
-				seliaze_protocal_data(cipher_text,tmp,connection,TEST_USER_ID),
+				seliaze_protocal_data_for_encrypt(cipher_text,tmp,connection,TEST_USER_ID,rsa_encrypt),
 				tmp+PROTOCAL_FRAME_STABLE_LENGTH, 0)) < 0)
 	{
 			perror("send setup_connect_msg falied ! failed");
 			return;
 	}
 	free(cipher_text);
+#else
+	printf("acs receive app length is %d message string is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
+	//need to handle very string
+
+	if ((sendbytes = send(sockfd,
+					seliaze_protocal_data(setup_confim_msg,strlen(setup_confim_msg),connection,TEST_USER_ID),
+					strlen(setup_confim_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) < 0)
+	{
+				perror("send setup_connect_msg falied ! failed");
+				return;
+	}
+#endif
 	//s4:acs receive confirm message
 	memset(buf,0,BUFFER_SIZE);
 	recvbytes = recv(sockfd,buf,1024,0);
@@ -113,12 +120,12 @@ void build_acs_connection(int sockfd)
 	{
 		printf("Fail;\n");
 	}
-	//send(sockfd,
-	//	seliaze_protocal_data(setup_ack_msg,strlen(setup_ack_msg),connection,TEST_USER_ID),
-	//	strlen(setup_ack_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-	//	0
-	//	);
-
+	//s5
+	send(sockfd,
+		seliaze_protocal_data(setup_ack_msg,strlen(setup_ack_msg),connection,TEST_USER_ID),
+	    strlen(setup_ack_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
+		0
+		);
 	printf("connetion sucessfull !\n");
 	printf("exit build acs connection end \n");
 }

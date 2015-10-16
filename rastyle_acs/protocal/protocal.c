@@ -17,7 +17,50 @@
 #include "../systemconfig.h"
 
 
-uint8_t  g_frame_data[PROTOCAL_FRAME_MAX_LENGTH] = {0};
+static uint8_t  g_frame_data[PROTOCAL_FRAME_MAX_LENGTH] = {0};
+
+/*
+ *  seliaze protocal frame data
+*/
+uint8_t* seliaze_protocal_data_for_encrypt(uint8_t * body_data,uint16_t length,enum protcal_type type,uint32_t user_id,eEncodeType encode_type)
+{
+	uint16_t offset = 0;
+	uint16_t tmp_16 = 0;
+	//memset global data buffer
+	memset(g_frame_data,0,PROTOCAL_FRAME_MAX_LENGTH);
+	//build frame header
+	tmp_16 = (uint16_t)START_FLAGS;
+	memcpy(g_frame_data,&tmp_16,sizeof(uint16_t));
+	offset += 2;
+	g_frame_data[offset] = (uint8_t)type;
+	offset += 1;
+	switch(encode_type)
+	{
+		case no_encrypt:
+			g_frame_data[offset] = (int)no_encrypt ;
+			break;
+		case rsa_encrypt:
+			g_frame_data[offset] = (int)rsa_encrypt;
+			break;
+		case des_encrypt:
+			g_frame_data[offset] = (int)des_encrypt ;
+			break;
+	}
+	offset +=1;
+	memcpy(g_frame_data+offset,&user_id,sizeof(uint32_t));
+	offset += 4;
+	tmp_16 = length+PROTOCAL_FRAME_STABLE_LENGTH;
+	memcpy(g_frame_data+offset,&tmp_16,sizeof(uint16_t));
+	offset += 2;
+	//add body data
+	memcpy(g_frame_data+offset,body_data,length);
+	offset += length;
+	//add frame endtmp_16
+	g_frame_data[offset] = (uint8_t)END_FLAGS;
+	//return data pointer
+	return g_frame_data;
+}
+
 
 /*
  *  seliaze protocal frame data
@@ -34,7 +77,8 @@ uint8_t* seliaze_protocal_data(uint8_t * body_data,uint16_t length,enum protcal_
 	offset += 2;
 	g_frame_data[offset] = (uint8_t)type;
 	offset += 1;
-	g_frame_data[offset] = 0 ;//reserved
+	//reseved
+	g_frame_data[offset] = 0 ;
 	offset +=1;
 	memcpy(g_frame_data+offset,&user_id,sizeof(uint32_t));
 	offset += 4;
@@ -104,10 +148,16 @@ int acs_get_user_id(uint8_t * body_data,uint16_t length)
 static int select_very_callback(void * data, int col_count, char ** col_values, char ** col_Name)
 {
 	  int i;
+	  //printf("data is %p col_count is %d \n",data,col_count);
 	  for( i=0; i < col_count; i++)
 	  {
 			printf( "%s = %s\n", col_Name[i], col_values[i] == 0 ? "NULL" : col_values[i] );
-		    strcat(data,col_values[i]);
+			if(data != NULL )
+			{
+				 // printf("col_values[i] length is %d \n",strlen(col_values[i]));
+				 strcat((char *)data,col_values[i]);
+			}
+
 	  }
 	  return 0;
 }
@@ -118,7 +168,7 @@ static int select_very_callback(void * data, int col_count, char ** col_values, 
 */
 int acs_verify_user_name(int protocal_userid,char * username)
 {
-	char value[20] = {0};
+	char value[1024] = {0};
 	char sSQL[100] = {0};
 	printf("username is %s \n",username);
 	sprintf(sSQL,"select UserID from acs_user_table where Username = '%s';",username);
@@ -142,9 +192,9 @@ int acs_verify_user_name(int protocal_userid,char * username)
 */
 int acs_verify_pwd(char * username,char * pwd)
 {
-	char value[100] = {0};
+	char value[1024] = {0};
 	char sSQL[100] = {0};
-	printf("pwd is %s \n",pwd);
+	printf("\npwd is %s\n",pwd);
 	sprintf(sSQL,"select PWD from acs_user_table where Username = '%s';",username);
 	sqlite_get_record_data(ACS_CONFIG_DATEBASE,sSQL,select_very_callback,&value);
 	if(strcmp(pwd,value) == 0)
@@ -159,5 +209,18 @@ int acs_verify_pwd(char * username,char * pwd)
 
 }
 
+/*
+ * acs get user rsa publick key
+ * note: only in username and password verify ok
+*/
+void acs_get_user_rsa_public_key(int userid,char * user_public_key)
+{
+	char sSQL[1024] = {0};
+	//printf("user_public_key is %p \n ",user_public_key);
+	//printf("acs_get_user_rsa_public_key current userid is %d \n",userid);
+	sprintf(sSQL,"select Publickey from acs_user_table where UserID = '%d';",userid);
+	//printf("sSQL is %s \n",sSQL);
+	sqlite_get_record_data(ACS_CONFIG_DATEBASE,sSQL,select_very_callback,user_public_key);
+}
 
 

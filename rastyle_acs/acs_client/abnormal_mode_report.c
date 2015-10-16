@@ -26,12 +26,12 @@
 /*
  * acs client handle abnormal mode
 */
-void acs_client_abnormal_mode_handle(int sockfd,char *data,int length)
+void acs_client_abnormal_mode_handle(int sockfd,char *data,int length,eEncodeType encode_type)
 {
 	int sendbytes,recvbytes;
 	if ((sendbytes =
 			send(sockfd,
-			  seliaze_protocal_data(data,length,abnormal,TEST_USER_ID),
+				 seliaze_protocal_data_for_encrypt(data,length,abnormal,TEST_USER_ID,encode_type),
 			  length+PROTOCAL_FRAME_STABLE_LENGTH, MSG_NOSIGNAL)) == -1)
 	{
 		perror("acs client report normal message falied \n !");

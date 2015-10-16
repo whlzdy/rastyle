@@ -122,7 +122,14 @@ void system_init(void)
 	create_acs_climate_table(ACS_CONFIG_DATEBASE);
 	create_acs_user_table(ACS_CONFIG_DATEBASE);
 	create_acs_abnormal_table(ACS_CONFIG_DATEBASE);
-	//wifi_test();
+	//create realtime plan task
+	sprintf(sSQL,"insert into %s (Planname,Objectadd1,volume1,Objectadd2,volume2,Objectadd3,volume3)values('%s','0x001C','65','0x001D','53','0x001E','78');",
+			ACS_PLAN_TASK,"realtime");
+	fprintf(stderr,"CONCL_PLADD sql is %s \n",sSQL);
+	acs_sqlite_exec_sql(ACS_CONFIG_DATEBASE,sSQL);
+	memset(sSQL,0,1024);
+	//drop table acs_user_table;
+	sprintf(sSQL,"drop table '%s' ",ACS_USER_DATA);
 	//return;
 	printf("system init begin ...... \n");
 	//config wind motor
@@ -158,15 +165,47 @@ void system_init(void)
 	set_opt(bluetooth_fd,115200,8,'N',1);
 	write(bluetooth_fd, cmd_config_name, sizeof(cmd_config_name));
 	printf("config bluetooth sucessfully bluetooth_fd is %d  \n",bluetooth_fd);
-	//create realtime plan task
-	sprintf(sSQL,"insert into %s (Planname,Objectadd1,volume1,Objectadd2,volume2,Objectadd3,volume3)values('%s','0x001C','65','0x001D','53','0x001E','78');",
-			ACS_PLAN_TASK,"realtime");
-	fprintf(stderr,"CONCL_PLADD sql is %s \n",sSQL);
-	acs_sqlite_exec_sql(ACS_CONFIG_DATEBASE,sSQL);
+
 	printf("system init succssfully \n");
 }
 
 
+/*
+* select realtime plan task callback
+*/
+static int select_realtime_callback(void *args, int col_count, char ** col_values, char ** col_Name)
+{
+  int i;
+  int * volumes = (int *)args;
+  for( i=0; i < col_count; i++)
+  {
+	printf( "%s = %s\n", col_Name[i], col_values[i] == 0 ? "NULL" : col_values[i] );
+	if(col_values[i] != NULL)
+	{
+		//handle string
+		//volumes[i] = atoi(col_values[i]);
+	}
+  }
+  return 0;
+}
+
+/*
+ * load last config params
+*/
+void last_config_params()
+{
+	int i;
+	int volumes[3] = {0};
+	char sSQL[1024] = {0};
+    //read last config params
+	sprintf(sSQL,"select volume1,volume2,volume3 from acs_plan_task_table where Planname = 'realtime';");
+	fprintf(stderr,"system query last config params sql is %s \n",sSQL);
+	sqlite_get_record_data(ACS_CONFIG_DATEBASE,sSQL,select_realtime_callback,volumes);
+    printf("system last wind monitor volumes is %d,%d,%d\n",volumes[0],volumes[1],volumes[2]); //whole wind monitor volumes
+	//set params to config wind monitor
+	acs_wind_motor_change_rate(volumes[0]);  //so far only one
+
+}
 
 
 extern void *acs_udp_broadcast_thread(void *args);   //udp broadcast thread main function
@@ -231,37 +270,38 @@ int main(int args,void **arg)
 	 pthread_attr_t acs_client_id_attr,acs_server_id_attr,udp_broadcast_attr,acs_sensor_attr,acs_bluetooth_attr;
 	 //system init
 	 system_init();
+	 last_config_params();
 	 //wifi_test();
 	 //sleep(5);
 	 //printf("acs_wind_motor_on %d \n",acs_wind_motor_on());
 	 //printf("acs_wind_motor_change_rate %d\n",acs_wind_motor_change_rate(rate));
      //thread create
-	// AIM_pThreadCreate(&acs_client_id, acs_client_id_attr, PTH_PRIO_HIGH, acs_client_thread, NULL);
-    // printf("create acs client process sucessfully !\n");
-	AIM_pThreadCreate(&acs_server_id, acs_server_id_attr, PTH_PRIO_HIGHEST, acs_server_tcp_thread, NULL);
-	 printf("create acs server process sucessfully !\n");
+	 AIM_pThreadCreate(&acs_client_id, acs_client_id_attr, PTH_PRIO_HIGH, acs_client_thread, NULL);
+       printf("create acs client process sucessfully !\n");
+	 AIM_pThreadCreate(&acs_server_id, acs_server_id_attr, PTH_PRIO_HIGHEST, acs_server_tcp_thread, NULL);
+	  printf("create acs server process sucessfully !\n");
 	 AIM_pThreadCreate(&udp_broadcast_id, udp_broadcast_attr,PTH_PRIO_LOWEST, acs_udp_broadcast_thread, NULL);
-	 printf("create acs udp broadcast process sucessfully !\n");
+	   printf("create acs udp broadcast process sucessfully !\n");
      AIM_pThreadCreate(&acs_sensor_id, acs_sensor_attr,  PTH_PRIO_HIGH_1 , acs_read_sensor_thread, NULL);
 	 printf("create acs sensor read  process sucessfully !\n");
 	 //AIM_pThreadCreate(&acs_bluetooth_id, acs_bluetooth_attr, PTH_PRIO_LOWEST, acs_server_bluetooth_thread, NULL);
 	 // printf("create acs bluetooth  process sucessfully !\n");
 	 if(pthread_join(acs_server_id, NULL))
-	   perror("acs server Join thread main_ctrl error");
-     //if(pthread_join(acs_client_id, NULL))
-      //perror("acs client Join thread main_ctrl error");
-    if(pthread_join(udp_broadcast_id, NULL))
-   	perror("udp broadcast Join thread main_ctrl error");
-    if(pthread_join(acs_sensor_id, NULL))
-      perror("sensor read Join thread main_ctrl error");
+	  perror("acs server Join thread main_ctrl error");
+     if(pthread_join(acs_client_id, NULL))
+        perror("acs client Join thread main_ctrl error");
+     if(pthread_join(udp_broadcast_id, NULL))
+ 	   perror("udp broadcast Join thread main_ctrl error");
+     if(pthread_join(acs_sensor_id, NULL))
+        perror("sensor read Join thread main_ctrl error");
     // if(pthread_join(acs_bluetooth_id, NULL))
       // perror("bluetooth Join thread main_ctrl error");
 
-    // pthread_attr_destroy(&acs_client_id_attr);
+     pthread_attr_destroy(&acs_client_id_attr);
      pthread_attr_destroy(&acs_server_id_attr);
      pthread_attr_destroy(&udp_broadcast_attr);
-    pthread_attr_destroy(&acs_sensor_attr);
-    // pthread_attr_destroy(&acs_bluetooth_attr);
+     pthread_attr_destroy(&acs_sensor_attr);
+   // pthread_attr_destroy(&acs_bluetooth_attr);
 	 return 0;
 }
 

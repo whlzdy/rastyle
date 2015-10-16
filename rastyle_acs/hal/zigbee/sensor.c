@@ -45,30 +45,35 @@ acs_client_normal_handle tfnnormal_handle;
 
 static int acs_client_fd;
 
-int acs_normal_report_inteval = 25;//s
-int acs_real_time_inteval = 30;    //s
+int acs_normal_report_inteval = 25;  //s
+int acs_real_time_inteval = 30;      //s
 
-extern char ACS_DES_KEY[];         //des key
+static char g_cloud_des_key[64] = {0};     //des key
 
 
 
  tACS_server_fd_msg_list acs_app_handle_list = {0};  //used to handle app report normal data
 
 
-void acs_client_bind2_sensor(int sockfd,acs_client_normal_handle normal_handle,acs_client_abnormal_handle abnormal_handle,acs_client_realtime_handle realtime_handle)
+void acs_client_bind2_sensor(int sockfd,acs_client_normal_handle normal_handle,acs_client_abnormal_handle abnormal_handle,acs_client_realtime_handle realtime_handle,char * des_key)
 {
 	printf("acs client register sensor callback \n");
 	acs_client_fd  = sockfd;
 	tfnabnormal_handle = abnormal_handle;
 	tfnrealtime_handle = realtime_handle;
 	tfnnormal_handle = normal_handle;
+	memset(g_cloud_des_key,0,64);
+	memcpy(g_cloud_des_key,des_key,64);
+
 }
 
-void acs_server_bind2_sensor(int sockfd,acs_server_realtime_handle tfnrealtime_handle)
+void acs_server_bind2_sensor(int sockfd,acs_server_realtime_handle tfnrealtime_handle,char *des_key)
 {
 	printf("sockfd is % d acs_server_bind2_sensor entry \n",sockfd);
 	acs_app_handle_list.app_conn_list[acs_app_handle_list.app_conn_count].fd = sockfd;
 	acs_app_handle_list.app_conn_list[acs_app_handle_list.app_conn_count].tfnrealtime_handle = tfnrealtime_handle;
+	memset(acs_app_handle_list.app_conn_list[acs_app_handle_list.app_conn_count].des_key,0,64);
+	memcpy(acs_app_handle_list.app_conn_list[acs_app_handle_list.app_conn_count].des_key,des_key,64);
 	acs_app_handle_list.app_conn_count ++;
 }
 
@@ -162,7 +167,8 @@ static int serilaze_inter_sensor_data (
 	 offset+=strlen(tmp);
 
      memset(tmp,0,100);
-	 sprintf(tmp,"%s=%d,", "室外PM1.0",pm1_0_1);
+	 //sprintf(tmp,"%s=%d,", "室外PM1.0",pm1_0_1);//pm1.0 → pm0.3
+	 sprintf(tmp,"%s=%d,", "室外PM0.3",pm1_0_1); //pm1.0 → pm0.3
 	 strcat(data_msg+offset,tmp);
 	 offset+=strlen(tmp);
 
@@ -175,7 +181,7 @@ static int serilaze_inter_sensor_data (
 	 sprintf(tmp,"%s=%d,", "室外PM10",pm10_1);
 	 strcat(data_msg+offset,tmp);
 	 offset+=strlen(tmp);
-
+#if 0
      memset(tmp,0,100);
 	 sprintf(tmp,"%s=%d,", "室外PM1.0(大气)",pm1_0_2);
 	 strcat(data_msg+offset,tmp);
@@ -190,7 +196,7 @@ static int serilaze_inter_sensor_data (
 	 sprintf(tmp,"%s=%d,", "室外大厅PM10(大气)",pm10_2);
 	 strcat(data_msg+offset,tmp);
 	 offset+=strlen(tmp);
-
+#endif
      memset(tmp,0,100);
 	 sprintf(tmp,"%s=%d,", "室内温度",indoor_tmp);
 	 strcat(data_msg+offset,tmp);
@@ -253,6 +259,7 @@ void *acs_read_sensor_thread(void *args)
 	float indoor_pm2_5 = 58,last_indoor_pm2_5;
 	float cO2 = 56,last_cO2;
 	float hcho = 28,last_hcho;
+	char * ciphertext = NULL;
 	//read zigbee data
     //sensor_fd = zigbee_fd;
 	//printf("acs is read sensor is %s  \n",ZIGBEE);
@@ -312,13 +319,6 @@ void *acs_read_sensor_thread(void *args)
 		serilaze_inter_sensor_data(sensor_data_2,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
 				last_indoor_tmp,last_indoor_humidity,last_voc,last_indoor_pm2_5,last_cO2,last_hcho,now,"DISPL_RTDMS:");
 
-		int real_time_encode_size = 0;
-		if(strlen(ACS_DES_KEY) > 0)
-		{
-			printf("ACS_DES_KEY is %s \n",ACS_DES_KEY);
-			DES_Encrypt(ACS_DES_KEY,sensor_data_2,&real_time_encode_size);
-		}
-
 
 		//printf("3333333 \n");
 		serilaze_inter_sensor_data(sensor_data_3,tem,humidity,pm1_0_1,pm2_5_1,pm10_1,pm1_0_2,pm2_5_2,pm10_2,\
@@ -331,8 +331,22 @@ void *acs_read_sensor_thread(void *args)
 			if(flag1 || difftime(now,last1) >= acs_normal_report_inteval)
 			{
 				flag1 = 0;
+#ifdef  ACS_ENCRYPT_FLAG
+				int cloud_normal_encode_size = 0;
+				//first get des encrypted length
+				ciphertext =  DES_Encrypt(
+			    		g_cloud_des_key,
+			    		sensor_data_3,
+			    		&cloud_normal_encode_size
+			    		);
+			    tfnnormal_handle(acs_client_fd,ciphertext,cloud_normal_encode_size,des_encrypt);
+			    free(ciphertext);
+			    ciphertext = NULL;
+#else
 				//normal mode
-				tfnnormal_handle(acs_client_fd,sensor_data_3,strlen(sensor_data_3));
+				tfnnormal_handle(acs_client_fd,sensor_data_3,strlen(sensor_data_3),no_encrypt);
+#endif
+
 				memcpy(&last1,&now,sizeof(now));
 			}
 		}
@@ -340,15 +354,34 @@ void *acs_read_sensor_thread(void *args)
 		{
 			if(flag2 || difftime(now,last2) >= acs_real_time_inteval)
 			{
+#ifdef  ACS_ENCRYPT_FLAG
+				int cloud_realtime_encode_size = 0;
+				//first get des encrypted length
+				ciphertext = DES_Encrypt(
+						g_cloud_des_key,
+						sensor_data_2,
+						&cloud_realtime_encode_size
+						);
+				tfnrealtime_handle(acs_client_fd,ciphertext,cloud_realtime_encode_size,des_encrypt);
+				free(ciphertext);
+				ciphertext = NULL;
+#else
 				//realtime mode
-				tfnrealtime_handle(acs_client_fd,sensor_data_2,strlen(sensor_data_2));
+				tfnrealtime_handle(acs_client_fd,sensor_data_2,strlen(sensor_data_2),no_encrypt);
+#endif
+
 				memcpy(&last2,&now,sizeof(now));
 			}
 		}
 	    if(acs_client_mode  >> 2)
 		{
+#ifdef  ACS_ENCRYPT_FLAG
+
+	    	//nothing
+#else
 			//abnormal mode
-			tfnabnormal_handle(acs_client_fd,NULL,0);
+			tfnabnormal_handle(acs_client_fd,NULL,0,no_encrypt);
+#endif
 		}
 		//handle server realtime mode
 		int i ;
@@ -356,11 +389,35 @@ void *acs_read_sensor_thread(void *args)
 		for(i = 0;i<acs_app_handle_list.app_conn_count;i++)
 		{
 			//report data to app
-			//acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(acs_app_handle_list.app_conn_list[i].fd,sensor_data_2,strlen(sensor_data_2));
-			if(strlen(ACS_DES_KEY) > 0)
+#ifdef ACS_ENCRYPT_FLAG
+			if(strlen(acs_app_handle_list.app_conn_list[i].des_key) > 0)
 			{
-				acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(acs_app_handle_list.app_conn_list[i].fd,DES_Encrypt(ACS_DES_KEY,sensor_data_2,NULL),real_time_encode_size);
+				int real_time_encode_size = 0;
+				//first get des encrypted length
+				ciphertext = DES_Encrypt(
+			    		acs_app_handle_list.app_conn_list[i].des_key,
+			    		sensor_data_2,
+			    		&real_time_encode_size
+			    		);
+			    //report data to app
+				acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(
+						   acs_app_handle_list.app_conn_list[i].fd,
+						   ciphertext,
+						   real_time_encode_size,
+						   des_encrypt
+						   );
+				free(ciphertext);
+				ciphertext = NULL;
 			}
+
+#else
+			acs_app_handle_list.app_conn_list[i].tfnrealtime_handle(
+					acs_app_handle_list.app_conn_list[i].fd,
+					sensor_data_2,
+					strlen(sensor_data_2),
+					no_encrypt
+					);
+#endif
 
 		}
 		//printf("sensor thread is survive \n");

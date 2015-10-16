@@ -150,21 +150,23 @@ int acs_tcp_receive(int client_sock,char* info,int *length)
 	  char frame_msg[65536] = {0};
 	  int num = 0;
 	  uint16_t packLength = 0;
-	  num = recv(client_sock,frame_msg,10,MSG_NOSIGNAL);
+	  num = recv(client_sock,frame_msg,10,0);//MSG_NOSIGNAL
 	  if(num < 0)
 	  {
+		  printf("acs_tcp_receive ret 1 is %d \n",num);
 		  return -1;
 	  }
-	  if(num < 10)
+	  if(num != 10)
 	  {
 		  return -2;
 	  }
 	  memcpy(&packLength,&frame_msg[8],sizeof(uint16_t));
-	  printf("packLength is %d \n",packLength);
+	  // printf("packLength is %d \n",packLength);
 	  num = 0;
-	  num = recv(client_sock,frame_msg+10,packLength-10,MSG_NOSIGNAL);
+	  num = recv(client_sock,frame_msg+10,packLength-10,0);
 	  if(num < 0)
 	  {
+		  printf("acs_tcp_receive ret 2 is %d \n",num);
 		  return -1;
 	  }
 	  if(num < packLength-10)

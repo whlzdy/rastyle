@@ -33,6 +33,7 @@
 #include "../systemconfig.h"
 #include "../device_control/device_control.h"
 #include "../sqlite/sqlite.h"
+#include "../openssl/rsa/acs_rsa.h"
 
 
 
@@ -50,13 +51,13 @@ static char report_app_msg[1024] = {0};
 /*
 * app real time handle call back
 */
-void acs_app_realtime_handle(int sockfd,char *data,int length)
+void acs_app_realtime_handle(int sockfd,char *data,int length,eEncodeType encode_type)
 {
 	int rc;
 	 // report real time data
 	//fprintf(stderr,"server is to sockfd %d report data .is %s \n",sockfd,data);
 	rc = send(sockfd,
-		 seliaze_protocal_data(data,length,real_time,TEST_USER_ID),
+		 seliaze_protocal_data_for_encrypt(data,length,real_time,TEST_USER_ID,encode_type),
 		 length+PROTOCAL_FRAME_STABLE_LENGTH,
 		 MSG_NOSIGNAL);
 }
@@ -154,58 +155,56 @@ void *handle_app_request_thread(void *args)
 	int recvbytes ;
 	int length;
 	int ret;
+    char user_rsa_public_key[1024] = {0};          //1024 bit encrypt
+    char user_des_key[64] = {0};                  //64 des key
+    char * plaintext = NULL;
 	sockfd = *(((thread_arg*)args)->psockfd);
 	printf("app handle thread sockfd is %d created \n",sockfd);
+	printf("user_rsa_public_key is %p ",user_rsa_public_key);
 	//s1 : setup connection
-    ret = stetup_acs_app_connection(sockfd);
+    ret = stetup_acs_app_connection(sockfd,user_rsa_public_key);
     if(ret != 0)
     {
     	printf("app info verify failed  sockfd %d quit \n",sockfd);
         return 0;
     }
+    //printf("user_rsa_public_key is %s \n",user_rsa_public_key);
 	//s2 : public message consult
-    app_public_information_consult(sockfd);
+    app_public_information_consult(sockfd,user_rsa_public_key,user_des_key);
     //s3 : register sensor callback
-    acs_server_bind2_sensor(sockfd,acs_app_realtime_handle);
+    acs_server_bind2_sensor(sockfd,acs_app_realtime_handle,user_des_key);
 	while(1)
 	{
 		//s3 : receive meesage and message
 		memset(recv_msg,0,65536);
 		//recvbytes = recv(sockfd,  recv_msg, sizeof(recv_msg),MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg, &length);
-		if(recvbytes <= -1)
+		if(recvbytes == -1)
 		{
-		     printf("sockfd is %d left as recv failed ",sockfd);
+		     printf("app sockfd is %d left as recv failed 1 \n",sockfd);
 			 FD_CLR(sockfd,&inset);
 			 close(sockfd);
 			 acs_app_handle_list.app_conn_count--;
 			 break;
 		}
-		if(length > 0)
+		if((length > 0) && (recvbytes == 0))
 		{
 			int encode_len = 0;
 			memset(buffer,0,65536);
 			//rsa decrypt
-			//memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
-			printf("app control message is %s len is %d\n",buffer,strlen(buffer));
-			printf("recv_msg[2] & 0xf0 is %d \n",recv_msg[2] & 0xf0);
-	        if((recv_msg[2] & 0xf0) == 0x50)
+	        if((recv_msg[3] & 0xff) == 0x03)
 	        {
-	        	//deseliaze_protocal_encode_data(recv_msg,length,&encode_len);
 	        	encode_len = length - 11;
-	        	memcpy(buffer,
-	        			js_public_decrypt(deseliaze_protocal_encode_data(recv_msg,length,NULL),
-	        					encode_len,
-	        					ACS_IOS_PUBLIC_KEY),
-	        			encode_len
-	        			);
-
+	        	plaintext = js_public_decrypt(deseliaze_protocal_encode_data(recv_msg,length,NULL),encode_len,user_rsa_public_key);
+	        	memcpy(buffer,plaintext,strlen(plaintext));
+	        	free(plaintext);
 	        }
 	        else
 	        {
-	        	memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);//delete end flag
+	        	//strcat(buffer,deseliaze_protocal_data(recv_msg,recvbytes));
+	        	memcpy(buffer,deseliaze_protocal_data(recv_msg,length),length-11);
 	        }
-			printf("app control message is %s len is %d\n",buffer,strlen(buffer));
+			//printf("app control message is %s len is %d\n",buffer,strlen(buffer));
 			if(strcmp(buffer,"Apply_for_control_authority;") == 0)
 			{
 				//send confirm msg
@@ -215,7 +214,7 @@ void *handle_app_request_thread(void *args)
 						MSG_NOSIGNAL);
 				if(rc == -1)
 				{
-					 printf("sockfd is %d left as send failed 2 ",sockfd);
+					 printf("app sockfd is %d left as send failed 2 \n",sockfd);
 					 FD_CLR(sockfd,&inset);
 					 close(sockfd);
 					 acs_app_handle_list.app_conn_count--;
@@ -231,7 +230,7 @@ void *handle_app_request_thread(void *args)
 						MSG_NOSIGNAL);
 				if(rc == -1)
 				{
-					 printf("sockfd is %d left as send failed 2 ",sockfd);
+					 printf("app sockfd is %d left as send failed 3 \n ",sockfd);
 					 FD_CLR(sockfd,&inset);
 					 close(sockfd);
 					 acs_app_handle_list.app_conn_count--;
@@ -254,6 +253,7 @@ void *handle_app_request_thread(void *args)
 							);
 				if(rc == -1)
 				{
+					 printf("app sockfd is %d left as send failed 4 \n ",sockfd);
 					 FD_CLR(sockfd,&inset);
 					 close(sockfd);
 					 acs_app_handle_list.app_conn_count--;
@@ -262,12 +262,12 @@ void *handle_app_request_thread(void *args)
 			}
 			else
 			{
-				printf("acs receive app device control message is %s \n",buffer);
+				//printf("acs receive app device control message is %s \n",buffer);
 				//device controlacs_plan_task
 				acs_handle_device_crontrol(sockfd,buffer);
 			}
 		}
 		TusSleep(500);
 	}
-	printf("server handle_app_request_thread sockfd %d quit \n",sockfd);
+	printf("app handle_app_request_thread sockfd %d quit \n",sockfd);
 }

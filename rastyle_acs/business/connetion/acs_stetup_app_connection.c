@@ -36,7 +36,7 @@ static char setup_fail_msg[]    = "Fail;";
  * build connection process
 */
 
-int stetup_acs_app_connection(int sockfd)
+int stetup_acs_app_connection(int sockfd,char * user_rsa_public_key)
 {
 	int packagelength = 0;
 	char *tmp = NULL;
@@ -47,6 +47,7 @@ int stetup_acs_app_connection(int sockfd)
 	char  buf[BUFFER_SIZE] = {0} ;
 	char  verify_string_array[VERYFY_STRING_LENGTH] = {0};
 	char * token;
+	char * plaintext = NULL;
 	//build acs connect
 	printf("entry build acs app connection begin \n");
 	recvbytes = recv(sockfd,verify_string_array,VERYFY_STRING_LENGTH,0);
@@ -71,6 +72,7 @@ int stetup_acs_app_connection(int sockfd)
 		perror("acs could received server verify string failed 2 \n");
 		return -1;
 	}
+	printf("recvbytes is %d \n",recvbytes);
 	//need check username  query user table
 	userid = acs_get_user_id(buf,recvbytes);
 	strcat(username,deseliaze_protocal_data(buf,recvbytes));
@@ -81,16 +83,17 @@ int stetup_acs_app_connection(int sockfd)
 	if(acs_verify_user_name(userid,username) != 0)
 	{
 		printf("username is %s username is not match userid!  \n",username);
-		//send(sockfd,
-		//		seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
-		//		strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-		//		0
-		//		);
-		//return -1;
+		send(sockfd,
+				seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
+				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
+				0
+				);
+		return -1;
 	}
 	//need check username
 	//acs send pwd
 	printf("acs receive app username length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
+	acs_get_user_rsa_public_key(userid,user_rsa_public_key);
 	//printf("acs receive app username length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	if(sendbytes = send(sockfd,
 		seliaze_protocal_data(setup_pwd_msg,strlen(setup_pwd_msg),connection,TEST_USER_ID),
@@ -107,29 +110,34 @@ int stetup_acs_app_connection(int sockfd)
 		perror("acs could received app user password \n");
 		return recvbytes;
 	}
+
 	//begin rsa decrypt
 #ifdef ACS_ENCRYPT_FLAG
 	int encode_len;
 	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	//deseliaze_protocal_encode_data(buf,packagelength,&encode_len);
 	encode_len = packagelength -11;
-	printf("encode_len is %d \n",encode_len);
-	strcat(pwd,js_public_decrypt(deseliaze_protocal_encode_data(buf,packagelength,NULL),encode_len, ACS_IOS_PUBLIC_KEY));
+	//printf("encode_len is %d \n",encode_len);
+	plaintext = js_public_decrypt(deseliaze_protocal_encode_data(buf,packagelength,NULL),encode_len, user_rsa_public_key);
+	//strcat(pwd,plaintext);//ACS_ANDROID_PUBLIC_KEY  ACS_IOS_PUBLIC_KEY
+	memcpy(pwd,plaintext,strlen(plaintext));
+	free(plaintext);
+
 #else
 	strcat(pwd,deseliaze_protocal_data(buf,packagelength));
 #endif
-	printf("password decrypt sucessful\n");
 	tmp = pwd;
 	token = strsep(&tmp, ";");
 	if(acs_verify_pwd(username,pwd) != 0)
 	{
 		printf("password wrong !\n");
-		//send(sockfd,
-		//		seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
-		//		strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-		//		0
-		//		);
-		//return -1;
+		send(sockfd,
+				seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
+				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
+			     0
+				);
+		printf("acs - app connetion failed  !\n");
+		return -1;
 	}
 	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	//send confirm

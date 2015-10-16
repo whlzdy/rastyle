@@ -24,11 +24,11 @@
 
 
 
-void acs_normal_mode_report(int sockfd,char * data,int length)
+void acs_normal_mode_report(int sockfd,char * data,int length,eEncodeType encode_type)
 {
 	int sendbytes,recvbytes;
 	if ((sendbytes = send(sockfd,
-				seliaze_protocal_data(data,length,normal,TEST_USER_ID),
+				seliaze_protocal_data_for_encrypt(data,length,normal,TEST_USER_ID,encode_type),
 				length+PROTOCAL_FRAME_STABLE_LENGTH, MSG_NOSIGNAL)) == -1)
 	{
 		perror("acs client report normal message falied \n !");

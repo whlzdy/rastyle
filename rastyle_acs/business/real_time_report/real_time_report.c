@@ -19,12 +19,12 @@
 
 
 
-void  acs_real_time_handle(int sockfd,char * data,int length)
+void  acs_real_time_handle(int sockfd,char * data,int length,eEncodeType encode_type)
 {
 	int sendbytes;
 	if ((sendbytes =
 			send(sockfd,
-			  seliaze_protocal_data(data,length,real_time,TEST_USER_ID),
+			   seliaze_protocal_data_for_encrypt(data,length,real_time,TEST_USER_ID,encode_type),
 			  length+PROTOCAL_FRAME_STABLE_LENGTH, MSG_NOSIGNAL)) == -1)
 	{
 		perror("acs client report real time message falied \n !");

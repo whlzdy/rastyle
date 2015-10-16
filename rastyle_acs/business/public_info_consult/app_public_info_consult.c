@@ -18,6 +18,8 @@
 
 #include "../../protocal/protocal.h"  //rasytye protocal
 #include "../../systemconfig.h"
+#include "../../openssl/rsa/acs_rsa.h"
+
 
 
 static char report_keys_update_msg[] = "INFEX_SYKCF:KEY=ajHL823iasdfUIKadfg;";
@@ -25,8 +27,8 @@ static char report_keys_update_msg[] = "INFEX_SYKCF:KEY=ajHL823iasdfUIKadfg;";
 
 static char report_2_sensor_msg[] = "INFEX_SERCF:室内温度=Indoor_temp|100|-50|°C,室内湿度=Indoor_Humidity|100|0|%,室内CO2=Indoor_CO2|5000|0|ppm,室内甲醛=Indoor_HCHO|80|0|mg/m3,室内PM2.5=Indoor_PM2.5|300|0|μg/m3,室内VOC=Indoor_VOC|3|0|NULL,"\
 		                            "室外温度=Outdoor_temp|100|-50|°C,室外湿度=Outdoor_Humidity|100|0|%,"\
-		                            "室外PM2.5=Outdoor_PM2.5|300|0|μg/m3,室外PM1.0=Outdoor_PM1.0|300|0|μg/m3,室外PM10=Outdoor_PM10|300|0|μg/m3,"\
-		                            "室外PM2.5(大气)=Outdoor_PM2.5|300|0|μg/m3,室外PM1.0(大气)=Outdoor_PM1.0|300|0|μg/m3,室外PM10(大气)=Outdoor_PM10.0|300|0|μg/m3;";
+		                            "室外PM2.5=Outdoor_PM2.5|300|0|μg/m3,室外PM0.3=Outdoor_PM0.3|300|0|μg/m3,室外PM10=Outdoor_PM10|300|0|μg/m3;";
+		                          //  "室外PM2.5(大气)=Outdoor_PM2.5|300|0|μg/m3,室外PM1.0(大气)=Outdoor_PM1.0|300|0|μg/m3,室外PM10(大气)=Outdoor_PM10.0|300|0|μg/m3;";
 
 static char report_2_app_timeout[] = "INFEX_MRMDA:TIMDL=5;";
 static char report_2_app_record[] = "INFEX_DRPER:PERIOD=15;";
@@ -35,12 +37,12 @@ static char report_2_app_user[] = "INFEX_OAREQ:role=Administrator;";
 static char public_consult_confirm_msg[] = "Confirm;";
 
 
-char ACS_DES_KEY[48] = {0};
+//char ACS_DES_KEY[48] = {0};
 
 /*
 ** public information consult
 */
-void app_public_information_consult(int sockfd)
+void app_public_information_consult(int sockfd,char* user_rsa_public_key,char* des_key)
 {
 	char * token2 = NULL;
 	char *name =NULL,*value = NULL;
@@ -63,7 +65,7 @@ void app_public_information_consult(int sockfd)
 	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	//deseliaze_protocal_encode_data(buf,package_length,&encode_len);
 	encode_len = package_length -11;
-	tmp = js_public_decrypt(deseliaze_protocal_encode_data(buf,package_length,NULL),encode_len, ACS_IOS_PUBLIC_KEY);
+	tmp = js_public_decrypt(deseliaze_protocal_encode_data(buf,package_length,NULL),encode_len, user_rsa_public_key);//ACS_ANDROID_PUBLIC_KEY  ACS_IOS_PUBLIC_KEY
 	printf("acs receive app des keys message is %s",tmp);
 	int first_flag = 1;
 	while((token = strsep(&tmp, ":")) != NULL)
@@ -78,8 +80,9 @@ void app_public_information_consult(int sockfd)
 		{
 			name = strsep(&token, "=");
 			token2 = strsep(&token,";");
-			memcpy(ACS_DES_KEY,token2,strlen(token2));
-			printf("acs des key is %s\n",ACS_DES_KEY);
+			//memcpy(ACS_DES_KEY,token2,strlen(token2));
+			memcpy(des_key,token2,strlen(token2));
+			printf("acs des key is %s\n",des_key);
 		}
 	}
 	free(tmp);

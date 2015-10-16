@@ -84,7 +84,7 @@ void *acs_server_tcp_thread(void *args)
 	 while(1)
 	 {
 		tmpinset = inset;
-		//printf("wait for client to request connection\n");
+		//printf("wait for app to request connection\n");
 		if (!(select(MAX_SOCK_FD, &tmpinset, NULL, NULL, NULL) > 0)) //0
 		{
 			 TusSleep(5000);
@@ -104,7 +104,7 @@ void *acs_server_tcp_thread(void *args)
 			conn_count++;
 			//printf("new socket connect to client,the socket fd is %d\n",client_fd);
 			arg.psockfd = &client_fd;
-			AIM_pThreadCreate_auto(&acs_server_handle_id, handle_app_thread_attr, priority--,handle_app_request_thread, &arg);
+			AIM_pThreadCreate(&acs_server_handle_id, handle_app_thread_attr, priority--,handle_app_request_thread, &arg);
 		}
 		TusSleep(5000);
       }

@@ -18,6 +18,7 @@
 #include "../protocal/protocal.h"
 #include "../systemconfig.h"
 #include "../hal/zigbee/sensor.h"
+#include "../openssl/rsa/acs_rsa.h"
 
 
 static char acs_update_request_msg[] = "Apply_for_UserInf_Update;";       //use to begin update user table
@@ -106,7 +107,7 @@ static void acs_handle_user_update_message(int sockfd,char * buffer)
 		printf( "CONAU_USADD handle entry \n");
 		sprintf(sSQL,"insert into %s values('%s','%s','%s','%s','%s','%s');",ACS_USER_DATA,sensor_data_list[2].data, \
 						sensor_data_list[0].data,sensor_data_list[1].data,sensor_data_list[3].data,sensor_data_list[4].data,sensor_data_list[5].data);
-		fprintf(stderr,"CONAU_USADD sql is %s \n",sSQL);
+		//fprintf(stderr,"CONAU_USADD sql is %s \n",sSQL);
 	}
 	else if(strcmp(order_msg,"CONAU_USMOD") == 0)
 	{
@@ -121,13 +122,13 @@ static void acs_handle_user_update_message(int sockfd,char * buffer)
 			sprintf(sSQL,"update %s set PWD = '%s',Publickey = '%s' where Username = '%s';",ACS_USER_DATA,sensor_data_list[1].data,\
 											sensor_data_list[2].data,sensor_data_list[0].data);
 		}
-		fprintf(stderr,"CONAU_USMOD sql is %s \n",sSQL);
+		//fprintf(stderr,"CONAU_USMOD sql is %s \n",sSQL);
 	}
 	else if(strcmp(order_msg,"CONAU_USDEL") == 0)
 	{
 		printf( "CONAU_USDEL handle entry \n");
 		sprintf(sSQL,"delete from %s where Username = '%s';",ACS_USER_DATA,sensor_data_list[0].data);
-		fprintf(stderr,"CONAU_USDEL sql is %s \n",sSQL);
+		//fprintf(stderr,"CONAU_USDEL sql is %s \n",sSQL);
 	}
 
 	acs_sqlite_exec_sql(ACS_CONFIG_DATEBASE,sSQL);
@@ -144,6 +145,9 @@ void acs_update_user_from_cloud(int sockfd)
 	int recvbytes,packlength;
 	char recv_msg[1024] = {0};
 	char buffer[65536]  = {0};
+	int encode_length;
+	char * plain_text = NULL;
+	int tmp;
 	printf("acs client is update user from cloud begin ...\n");
 	memset(recv_msg,0,1024);
 	rc = send(sockfd,
@@ -159,7 +163,7 @@ void acs_update_user_from_cloud(int sockfd)
 	while(1)
 	{
 		memset(recv_msg,0,1024);
-		recvbytes = acs_tcp_receive(sockfd, recv_msg,&packlength);
+		recvbytes = acs_tcp_receive(sockfd,recv_msg,&packlength);
 		if(recvbytes == -1 )
 		{
 			perror("acs receved cloud update user message ack failed \n");
@@ -170,8 +174,22 @@ void acs_update_user_from_cloud(int sockfd)
 			return;
 		}
 		memset(buffer,0,65536);
-		memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);
-		printf("cloud update user table control message is %s len is %d\n",buffer,strlen(buffer));
+		if((recv_msg[3] & 0xff) == 0x03)
+		{
+			//rsa encrypt
+			encode_length = packlength - PROTOCAL_FRAME_STABLE_LENGTH;
+			//printf("encode_length is %d \n",encode_length);
+			plain_text = js_public_decrypt(deseliaze_protocal_encode_data(recv_msg,packlength,(uint16_t *)&tmp),encode_length,CLOUD_PUBLIC_KEY);//
+			//printf("acs receive cloud decrypt plain text is %s \n",plain_text);
+			memcpy(buffer,plain_text,strlen(plain_text));
+			free(plain_text);
+		}
+		else
+		{
+			// no encrypt
+			memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);
+		}
+		//printf("cloud update user table control message is %s len is %d\n",buffer,strlen(buffer));
 		if(strcmp(buffer,"User_Information_Update_Finish;") == 0)
 		{
 			printf("acs client update user sucess and end \n");
@@ -181,7 +199,7 @@ void acs_update_user_from_cloud(int sockfd)
 		{
 			acs_handle_user_update_message(sockfd,buffer);
 		}
-		printf("acs client is update user from cloud end !\n");
 	}
+	printf("acs client is update user from cloud end !\n");
 
 }

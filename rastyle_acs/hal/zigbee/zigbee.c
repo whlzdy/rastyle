@@ -139,7 +139,7 @@ int acs_get_zigbee_tmp_and_humidity(
 		{
 			memcpy(indoor_tmp,&data[6],sizeof(uint16_t));
 			memcpy(indoor_humidity,&data[8],sizeof(uint16_t));
-			printf("zigbee温度是%d，湿度是%d\n",*indoor_tmp,*indoor_humidity);
+			//printf("zigbee温度是%d，湿度是%d\n",*indoor_tmp,*indoor_humidity);
 			return 0;
 		}
 		else
@@ -194,7 +194,7 @@ int acs_get_zigbee_pm_2_5(
 		{
 			* voc = data[9];
 			* indoor_pm2_5 = (data[7] +data[8] * 0.01)*10;
-			printf("zigbee voc 是%d，pm2.5 是%f\n",*voc,*indoor_pm2_5);
+			//printf("zigbee voc 是%d，pm2.5 是%f\n",*voc,*indoor_pm2_5);
 			return 0;
 		}
 		else
@@ -248,7 +248,7 @@ int acs_get_zigbee_cO2(float * cO2)
 			memcpy(&high,&data[6],2);
 			memcpy(&low,&data[8],2);
 			*cO2 = high * 256 + low;
-			printf("zigbee cO2 is %f \n",*cO2);
+			//printf("zigbee cO2 is %f \n",*cO2);
 			return 0;
 		}
 		else
@@ -311,7 +311,7 @@ int acs_get_zigbee_hcho(float * hcho)
 			tmp = data[8]*256+data[9];
 			*hcho = tmp/1340;
 
-			printf("zigbee hcho is %f\n",*hcho);
+			//printf("zigbee hcho is %f\n",*hcho);
 			return 0;
 		}
 		else

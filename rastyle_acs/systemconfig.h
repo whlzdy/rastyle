@@ -14,6 +14,13 @@
 
 
 
+typedef enum _tagencrypt
+{
+	no_encrypt  = 0x00,
+	rsa_encrypt = 0x03,
+	des_encrypt = 0x01
+}eEncodeType;
+
 
 #define PTH_PRIO_HIGHEST           	85     //define pthread priority
 #define PTH_PRIO_HIGH_1             80
@@ -66,28 +73,32 @@
 "D3GQPfNKXshHB9JaPQIDAQAB\n"\
 "-----END PUBLIC KEY-----\n"
 
+
 #define ACS_PRIVATE_KEY "-----BEGIN RSA PRIVATE KEY-----\n"\
-"MIICXgIBAAKBgQDFCHp1zloS2nCnLPbU1FtYc2EdSxSThEjefk/khTzFl5xx8JRf\n"\
-"rP0+RrPsXqzODC4H1nHxz/BZO9NZ3Onu2UGy+5PN8s3sQE3lKbuBJYkrEUdb7q+n\n"\
-"SPKtYvDQ04BhUU6opfbR6cyc0H/seDU7QSJeVyobQYUaXDiqlkTIL2oILwIDAQAB\n"\
-"AoGBAK6ywcHKYNrui4vutjwmvYdDZgwPEgNp+yIrZLL939BiiPgNk8DxJOkez1D4\n"\
-"8McQzY9teEIrWLQF83NuCI0aXMDCwcWNENkmQRW3Vv9vSv575/VnWf3bDODltyfQ\n"\
-"miiO41Y18xU0cyTTVPKzHGPr00MXJ3RAJqHnuiW6LOawnKDBAkEA7CwzANi0dSg5\n"\
-"2KYmCuQd/xM/janjTkEbzHzCmJUIZQJfJlu5R7J1A0IGunDwaUg9bm6TBzp62+3Y\n"\
-"kP7rSJBj5wJBANWTGIt5KhZZeqRUC0PDvcr/m6sXiosdS15p/InS1FzwyXdjXEUW\n"\
-"/tYiHZqYt25ixu+zJYJNJtAWCPc3X54ksHkCQQCfz6zXpsw99vFly9A0UHaH00OP\n"\
-"HeWlX2NrNQUM8NQUXc17DFhMztJlWPlqkd/srih7oLE3E/hs9/4y53zYxnQDAkEA\n"\
-"wmSfq5s+HpeVFGtW0XghkNp00xabSKICTs5DSSM3ndygU2WBv3T9wOPOdD9afkOz\n"\
-"9MrnciFNGYtk37dr9aJJaQJAWfBm33YzCMRNZdOq8vZ7YEhaSjIrvWU/JMRIJz+O\n"\
-"ndPo1DhnJBHZJpNvcXJxPuy3wv5XZuP6N5krMcYTpLvffQ==\n"\
+"MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBANlDLwVr4B4QFJW4\n"\
+"fT6oXWMUu9uxlBp06WyB8UvSZOwAY2SDZexKh9SbupMZmVt8B4NSe/AavJMtxzho\n"\
+"0UADMymwGQy26f/nd5N3hdcwWi+MKsUEG/Ilk9WrD25XHU4nA2kjRpW94Xh9EyNA\n"\
+"jU/9sT4jqRwPcZA980peyEcH0lo9AgMBAAECgYAjZGJgi7Yyr4Pq7+bXMi4kWdhQ\n"\
+"bZkmxizQVEqug1OVbmrCkPUljO6bn9LA68ajtIy0w9cUwgY+I5L0iX6s4tiOgR7+\n"\
+"WWbgGuXU582ep/7JZmBFlXxhSJAy/EIIn8A99gPbsh/Yxk7MkYG+grRdwZ/c3thF\n"\
+"pXf0z6DP2teHbxqssQJBAOxKt/wuW3Zdp4gmKyWNlFZV7UL3NMP39BAqj/xCqczH\n"\
+"tDvrpSrm1+l380p+0j2OuLEcvvg4YVe/xezXIbcVgYsCQQDrYiZ9B5Jd968uVHye\n"\
+"9HlS8yc6C+1RE2dNFObAsjhkjG1NhE5UEXtzIZC6zrIrO/mh/9W2Hi0WN13MmPG+\n"\
+"zHxXAkBQMk/djFJIiyLIJ8QvG61D3CgJuWM0O9ye/AMgZ/O/Z+w5BhJpzC1ttONi\n"\
+"3kY21FDE8++wyVnocVMYvi9YNzlfAkEApPziP4c8KBOBvjbIN17jX6pCF6TejpLM\n"\
+"OLJq4CzL7GamAsy3XqP2ZQfk+5wANN/QJaY+tW3HaqgaXlviLzwD9wJBAJ/6aJkS\n"\
+"zBCGIB7gYHz72FrH+tB6m5zh46H+qHawxM9rkZaka9jJmiURiEW1xxN2iymPHNnk\n"\
+"dhw3I50ZxVdk2jM=\n"\
 "-----END RSA PRIVATE KEY-----\n"
 
+
 #define CLOUD_PUBLIC_KEY "-----BEGIN PUBLIC KEY-----\n"\
-"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZQy8Fa+AeEBSVuH0+qF1jFLvb\n"\
-"sZQadOlsgfFL0mTsAGNkg2XsSofUm7qTGZlbfAeDUnvwGryTLcc4aNFAAzMpsBkM\n"\
-"tun/53eTd4XXMFovjCrFBBvyJZPVqw9uVx1OJwNpI0aVveF4fRMjQI1P/bE+I6kc\n"\
-"D3GQPfNKXshHB9JaPQIDAQAB\n"\
+"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzSqwq82zwFj4bnYhUf3zFoY+0\n"\
+"TU8Zu6I4zZBbsJPQc8UIuWsZ0mnuISGVi2IpNoyVaKJyaABahG9ch0A4p7oE1Bb8\n"\
+"/1LsI29ksQucCP07faFpXPAWG/gqs2iyBiS+9f9JbzNnLtPNiwNokbKK/7tLRJYH\n"\
+"UwWk9ZQmH+zuYsz+aQIDAQAB\n"\
 "-----END PUBLIC KEY-----\n"
+
 
 #define ACS_IOS_PUBLIC_KEY "-----BEGIN PUBLIC KEY-----\n"\
 "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDLshBthcdJIidPRDPxki+hHOKx\n"\
@@ -97,9 +108,21 @@
 "-----END PUBLIC KEY-----\n"
 
 
+#define ACS_ANDROID_PUBLIC_KEY "-----BEGIN PUBLIC KEY-----\n"\
+"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCebNwDfLpLunTDiYyO32PcfnYM\n"\
+"1GmBT7CzKa6zVMDH+HqTAptZIfYBdUOt+FQDIzlKguqFJzkbqQZ3dOmEkXEtcJEZ\n"\
+"syovqCODKdjHoavRKRKzVzRQcgG4yENkna3215XnCUNiYC8u1b558jmcZWnb2VZs\n"\
+"suObHtGusaz6yfe/EwIDAQAB\n"\
+"-----END PUBLIC KEY-----\n"
 
-#define ACS_ENCRYPT_FLAG   0
+
+
+#define ACS_ENCRYPT_FLAG   0      //enrypt switch
+
+
 #define BUFFER_SIZE (65536+20)
+
+
 
 
 #endif
