@@ -388,6 +388,7 @@ void *acs_read_sensor_thread(void *args)
 		//printf("fasdfsa,app count is %d \n",acs_app_handle_list.app_conn_count);
 		for(i = 0;i<acs_app_handle_list.app_conn_count;i++)
 		{
+			printf("acs is report real time data to app ,app conn count is %d \n",acs_app_handle_list.app_conn_count);
 			//report data to app
 #ifdef ACS_ENCRYPT_FLAG
 			if(strlen(acs_app_handle_list.app_conn_list[i].des_key) > 0)

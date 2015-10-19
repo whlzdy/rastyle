@@ -19,6 +19,7 @@
 #include "../../protocal/protocal.h"  //rasytye protocal
 #include "../../systemconfig.h"
 #include "../../openssl/rsa/acs_rsa.h"
+#include "../../common_utils.h"
 
 
 static char report_public_consult_msg[] = "INFEX_SERCF:室内温度=Indoor_temp|100|-50|°C,室内湿度=Indoor_Humidity|100|0|%,室内CO2=Indoor_CO2|5000|0|ppm,室内甲醛=Indoor_HCHO|80|0|mg/m3,室内PM2.5=Indoor_PM2.5|300|0|μg/m3,室内VOC=Indoor_VOC|3|0|NULL,"\
@@ -48,6 +49,7 @@ void public_information_consult(int sockfd,char * des_key)
 	int tmp = 0;
 	char *cipher_text = NULL, *plain_text = NULL;
 	int encode_length;
+	int packlength = 0;
 	//first build report_keys_update_msg
 	build_des_key_report_msg(report_keys_update_msg,des_key);
     printf("entry public information consult begin \n");
@@ -56,16 +58,17 @@ void public_information_consult(int sockfd,char * des_key)
     //s1:
 	cipher_text = js_private_encrypt(report_keys_update_msg,&tmp,ACS_PRIVATE_KEY);
 	printf("after enrypt encode_length is %d \n",tmp);
-	if ((sendbytes = send(sockfd,
+	if ((sendbytes = acs_tcp_send(sockfd,
 				seliaze_protocal_data_for_encrypt(cipher_text,tmp,public_consult,TEST_USER_ID,rsa_encrypt),
-				tmp+PROTOCAL_FRAME_STABLE_LENGTH, 0)) < 0)
+				tmp+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
 	{
 			perror("send setup_connect_msg falied ! failed");
 			return;
 	}
 	free(cipher_text);
     //s2 :echo back des key (need private decrypt)
-    recvbytes = recv(sockfd,recv_msg,1024,0);
+	packlength = 0;
+    recvbytes = acs_tcp_receive(sockfd,recv_msg,&packlength);
 	if(recvbytes < 0)
 	{
 		perror("receive server ack message failed \n");
@@ -96,11 +99,10 @@ void public_information_consult(int sockfd,char * des_key)
     }
     printf("acs receive server keys ack message is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
 #endif
-
-
     //s3:get server timeout time
+    packlength = 0;
     memset(recv_msg,0,1024);
-    recvbytes = recv(sockfd,recv_msg,1024,0);
+    recvbytes = acs_tcp_receive(sockfd,recv_msg,&packlength);
     if(recvbytes < 0)
     {
     	perror("receive server ack message failed \n");
@@ -108,6 +110,7 @@ void public_information_consult(int sockfd,char * des_key)
     }
     printf("acs receive server timeout message is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
     //need compare receive message
+#if 0
     if ((sendbytes =
        			send(sockfd,
        			  seliaze_protocal_data(public_consult_confirm_msg,(uint16_t)strlen(public_consult_confirm_msg),public_consult,TEST_USER_ID),
@@ -116,9 +119,19 @@ void public_information_consult(int sockfd,char * des_key)
 		perror("report public keys message s3 falied !\n");
 		return;
 	}
+#endif
+    if ((sendbytes =
+       			  acs_tcp_send(sockfd,
+       			  seliaze_protocal_data(public_consult_confirm_msg,(uint16_t)strlen(public_consult_confirm_msg),public_consult,TEST_USER_ID),
+       			  strlen(public_consult_confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH)) == -1)
+	{
+		perror("report public keys message s3 falied !\n");
+		return;
+	}
     //s4:get server interval time
     memset(recv_msg,0,1024);
-    recvbytes = recv(sockfd,recv_msg,1024,0);
+    packlength = 0;
+    recvbytes = acs_tcp_receive(sockfd,recv_msg,&packlength);
 	if(recvbytes < 0)
 	{
 		perror("receive server ack message interval failed \n");
@@ -126,25 +139,24 @@ void public_information_consult(int sockfd,char * des_key)
 	}
 	printf("acs receive server interval message is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
 	//need compare receive message
-	if ((sendbytes =
-				send(sockfd,
+	if ((sendbytes = acs_tcp_send(sockfd,
 				  seliaze_protocal_data(public_consult_confirm_msg,(uint16_t)strlen(public_consult_confirm_msg),public_consult,TEST_USER_ID),
-				  strlen(public_consult_confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) == -1)
+				  strlen(public_consult_confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH)) == -1)
 	{
 		perror("report public keys message s4 falied !\n");
 		return;
 	}
 	//s5:report acs sensor data
-	if ((sendbytes =
-					send(sockfd,
+	if ((sendbytes = acs_tcp_send(sockfd,
 					  seliaze_protocal_data(report_public_consult_msg,(uint16_t)strlen(report_public_consult_msg),public_consult,TEST_USER_ID),
-					  strlen(report_public_consult_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) == -1)
+					  strlen(report_public_consult_msg)+PROTOCAL_FRAME_STABLE_LENGTH)) == -1)
 	{
 		perror("report public keys message s4 falied !\n");
 		return;
 	}
 	memset(recv_msg,0,1024);
-	recvbytes = recv(sockfd,recv_msg,1024,0);
+	packlength = 0;
+	recvbytes = acs_tcp_receive(sockfd,recv_msg,&packlength);
 	if(recvbytes < 0)
 	{
 		perror("receive server ack message failed \n");

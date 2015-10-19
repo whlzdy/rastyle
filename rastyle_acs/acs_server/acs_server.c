@@ -85,7 +85,8 @@ void *acs_server_tcp_thread(void *args)
 	 {
 		tmpinset = inset;
 		//printf("wait for app to request connection\n");
-		if (!(select(MAX_SOCK_FD, &tmpinset, NULL, NULL, NULL) > 0)) //0
+		//printf("current socket connection num is %d \n",conn_count);
+		if (!(select(MAX_SOCK_FD, &tmpinset, NULL, NULL, 0) > 0)) //0 NULL
 		{
 			 TusSleep(5000);
 			 //perror("acs server select");

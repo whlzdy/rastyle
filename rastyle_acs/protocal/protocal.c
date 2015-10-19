@@ -114,7 +114,7 @@ char* deseliaze_protocal_data(uint8_t * body_data,uint16_t length)
     //get data length
 	memcpy(&tmp_16,body_data+8,sizeof(uint16_t));
 	//printf("frame length is %d \n",tmp_16);
-	memcpy(g_frame_data,body_data+10,tmp_16);
+	memcpy(g_frame_data,body_data+10,tmp_16-PROTOCAL_FRAME_STABLE_LENGTH);
 	return g_frame_data;
 }
 

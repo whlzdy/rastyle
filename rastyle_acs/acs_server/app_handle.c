@@ -56,10 +56,20 @@ void acs_app_realtime_handle(int sockfd,char *data,int length,eEncodeType encode
 	int rc;
 	 // report real time data
 	//fprintf(stderr,"server is to sockfd %d report data .is %s \n",sockfd,data);
+#if  1
 	rc = send(sockfd,
 		 seliaze_protocal_data_for_encrypt(data,length,real_time,TEST_USER_ID,encode_type),
 		 length+PROTOCAL_FRAME_STABLE_LENGTH,
-		 MSG_NOSIGNAL);
+		 0);//MSG_NOSIGNAL
+	if(rc == -1)
+	{
+		close(sockfd);
+	}
+#endif
+	//acs_tcp_send(sockfd,
+	//		seliaze_protocal_data_for_encrypt(data,length,real_time,TEST_USER_ID,encode_type),
+	//		length+PROTOCAL_FRAME_STABLE_LENGTH
+	//		);
 }
 
 
@@ -101,11 +111,21 @@ int get_app_record_callback (void * data, int col_count, char ** col_values, cha
 	 strcat(report_app_msg+offset,tmp);
 	 offset+=strlen(tmp);
 	 strcat(report_app_msg+offset,";");
+#if 1
 	 rc = send(sockfd,
 				seliaze_protocal_data(report_app_msg,strlen(report_app_msg),info_sync,TEST_USER_ID),
 				strlen(report_app_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-				MSG_NOSIGNAL
+				0//MSG_NOSIGNAL
 				);
+	 if(rc == -1)
+	 {
+		close(sockfd);
+	 }
+#endif
+	// acs_tcp_send(sockfd,
+	//		    seliaze_protocal_data(report_app_msg,strlen(report_app_msg),info_sync,TEST_USER_ID),
+	//		    strlen(report_app_msg)+PROTOCAL_FRAME_STABLE_LENGTH
+	//		    );
 	 return 0;
 }
 
@@ -131,12 +151,22 @@ int get_app_climate_callback (void * data, int col_count, char ** col_values, ch
 	 strcat(report_app_msg+offset,tmp);
 	 offset+=strlen(tmp);
 	 strcat(report_app_msg+offset,";");
+#if  1
 	 rc = send(
 			 sockfd,
 			 seliaze_protocal_data(report_app_msg,strlen(report_app_msg),info_sync,TEST_USER_ID),
 			 strlen(report_app_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-			 MSG_NOSIGNAL
+			 0//MSG_NOSIGNAL
 			 );
+	 if(rc == -1)
+	 {
+		 close(sockfd);
+	 }
+#endif
+	// acs_tcp_send(sockfd,
+	//		    seliaze_protocal_data(report_app_msg,strlen(report_app_msg),info_sync,TEST_USER_ID),
+	//		    strlen(report_app_msg)+PROTOCAL_FRAME_STABLE_LENGTH
+	//		    );
 	 return 0;
 }
 
@@ -179,7 +209,7 @@ void *handle_app_request_thread(void *args)
 		memset(recv_msg,0,65536);
 		//recvbytes = recv(sockfd,  recv_msg, sizeof(recv_msg),MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg, &length);
-		if(recvbytes == -1)
+		if(recvbytes < 0)
 		{
 		     printf("app sockfd is %d left as recv failed 1 \n",sockfd);
 			 FD_CLR(sockfd,&inset);
@@ -208,11 +238,17 @@ void *handle_app_request_thread(void *args)
 			if(strcmp(buffer,"Apply_for_control_authority;") == 0)
 			{
 				//send confirm msg
+#if 0
 				rc = send(sockfd,
 						seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
 						strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-						MSG_NOSIGNAL);
-				if(rc == -1)
+						0);
+#endif
+				rc = acs_tcp_send(sockfd,
+						seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
+						strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH
+						);
+				if(rc < 0)
 				{
 					 printf("app sockfd is %d left as send failed 2 \n",sockfd);
 					 FD_CLR(sockfd,&inset);
@@ -224,11 +260,17 @@ void *handle_app_request_thread(void *args)
 			else if(strcmp(buffer,"Undo_for_control_authority;") == 0)
 			{
 				//send confirm msg
+#if 0
 				rc = send(sockfd,
 						seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
 						strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-						MSG_NOSIGNAL);
-				if(rc == -1)
+						0);//MSG_NOSIGNAL
+#endif
+				rc = acs_tcp_send(sockfd,
+						seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
+						strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH
+						);
+				if(rc < 0)
 				{
 					 printf("app sockfd is %d left as send failed 3 \n ",sockfd);
 					 FD_CLR(sockfd,&inset);
@@ -246,12 +288,18 @@ void *handle_app_request_thread(void *args)
 				//send climate
 				sqlite_get_record_data(ACS_CONFIG_DATEBASE,sqldata2,get_app_climate_callback,&sockfd);
 				//send finish msg
+#if 0
 				rc = send(sockfd,
 							seliaze_protocal_data(finish_msg,strlen(finish_msg),info_sync,TEST_USER_ID),
 							strlen(finish_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-							MSG_NOSIGNAL
+							0//MSG_NOSIGNAL
 							);
-				if(rc == -1)
+#endif
+				rc = acs_tcp_send(sockfd,
+							seliaze_protocal_data(finish_msg,strlen(finish_msg),info_sync,TEST_USER_ID),
+							strlen(finish_msg)+PROTOCAL_FRAME_STABLE_LENGTH
+							);
+				if(rc < 0)
 				{
 					 printf("app sockfd is %d left as send failed 4 \n ",sockfd);
 					 FD_CLR(sockfd,&inset);
@@ -270,4 +318,5 @@ void *handle_app_request_thread(void *args)
 		TusSleep(500);
 	}
 	printf("app handle_app_request_thread sockfd %d quit \n",sockfd);
+	pthread_detach(pthread_self());
 }

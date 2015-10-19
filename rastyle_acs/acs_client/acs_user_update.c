@@ -150,11 +150,10 @@ void acs_update_user_from_cloud(int sockfd)
 	int tmp;
 	printf("acs client is update user from cloud begin ...\n");
 	memset(recv_msg,0,1024);
-	rc = send(sockfd,
+	rc = acs_tcp_send(sockfd,
 			  seliaze_protocal_data(acs_update_request_msg,strlen(acs_update_request_msg),public_consult,TEST_USER_ID),
-			  strlen(acs_update_request_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-			  MSG_NOSIGNAL);
-	if(rc == -1)
+			  strlen(acs_update_request_msg)+PROTOCAL_FRAME_STABLE_LENGTH);
+	if(rc < 0)
 	{
 		printf("223354 \n");
 		return;
@@ -164,7 +163,7 @@ void acs_update_user_from_cloud(int sockfd)
 	{
 		memset(recv_msg,0,1024);
 		recvbytes = acs_tcp_receive(sockfd,recv_msg,&packlength);
-		if(recvbytes == -1 )
+		if(recvbytes < 0 )
 		{
 			perror("acs receved cloud update user message ack failed \n");
 			return;
@@ -187,7 +186,7 @@ void acs_update_user_from_cloud(int sockfd)
 		else
 		{
 			// no encrypt
-			memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes))-1);
+			memcpy(buffer,deseliaze_protocal_data(recv_msg,recvbytes),strlen(deseliaze_protocal_data(recv_msg,recvbytes)));
 		}
 		//printf("cloud update user table control message is %s len is %d\n",buffer,strlen(buffer));
 		if(strcmp(buffer,"User_Information_Update_Finish;") == 0)

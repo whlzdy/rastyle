@@ -37,6 +37,7 @@ int TSleep(long us);
 */
 int acs_is_abnormal(void);
 
+int acs_tcp_send(int client_sock,char* info,int length);
 
 int acs_tcp_receive(int client_sock,char* info,int *length);
 

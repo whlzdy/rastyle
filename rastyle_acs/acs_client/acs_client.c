@@ -206,7 +206,7 @@ Reconnetion:
 		//recvbytes = recv(sockfd, recv_msg, sizeof(recv_msg), MSG_NOSIGNAL);
 		recvbytes = acs_tcp_receive(sockfd, recv_msg,&packlength );
 		//printf("recvbytes is %d \n",recvbytes);
-		if(recvbytes == -1 )
+		if(recvbytes < 0)
 		{
 			perror("acs receved server message ack failed \n");
 			handle_socket_reconnection();
@@ -248,12 +248,18 @@ Reconnetion:
 		 //need check username  query user table
 		if(strcmp(buffer,"Apply_for_control_authority;") == 0)
 		{
+#if 0
 			//send confirm msg
 			rc = send(sockfd,
 					seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
 					strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
 					MSG_NOSIGNAL);
-			if(rc == -1)
+#endif
+			rc = acs_tcp_send(sockfd,
+					seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
+					strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH
+					);
+			if(rc < 0)
 			{
 				 printf("sockfd is %d left as send failed 2 ",sockfd);
 				 handle_socket_reconnection();
@@ -264,16 +270,21 @@ Reconnetion:
 		else if(strcmp(buffer,"Undo_for_control_authority;") == 0)
 		{
 			//send confirm msg
+#if 0
 			rc = send(sockfd,
 					seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
 					strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
 					MSG_NOSIGNAL);
-			if(rc == -1)
+#endif
+			rc = acs_tcp_send(sockfd,
+					seliaze_protocal_data(confirm_msg,strlen(confirm_msg),device_control,TEST_USER_ID),
+					strlen(confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH
+					);
+			if(rc < 0)
 			{
 				 printf("sockfd is %d left as send failed 2 ",sockfd);
 				 handle_socket_reconnection();
 				 goto Reconnetion;
-
 			}
 		}
 		else if(strcmp(buffer,"State_synchronization_request;") == 0)
@@ -286,12 +297,17 @@ Reconnetion:
 			sqlite_get_record_data(ACS_CONFIG_DATEBASE,sqldata2,get_climate_callback,&sockfd);
 
 			//send finish msg
+#if 0
 			rc = send(sockfd,
 						seliaze_protocal_data(finish_msg,strlen(finish_msg),info_sync,TEST_USER_ID),
 						strlen(finish_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
 						MSG_NOSIGNAL
 						);
-			if(rc == -1)
+#endif
+			rc = acs_tcp_send(sockfd,
+						seliaze_protocal_data(finish_msg,strlen(finish_msg),info_sync,TEST_USER_ID),
+						strlen(finish_msg)+PROTOCAL_FRAME_STABLE_LENGTH);
+			if(rc < 0)
 			{
 				 printf("sockfd is %d left as send failed 2 ",sockfd);
 				 handle_socket_reconnection();

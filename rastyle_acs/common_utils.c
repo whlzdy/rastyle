@@ -142,41 +142,79 @@ int acs_is_abnormal(void)
 }
 
 
+
+int acs_tcp_send(int client_sock,char* info,int length)
+{
+	 fd_set output;
+	 struct timeval tv;
+	 tv.tv_sec = 20;
+	 tv.tv_usec = 0;
+	 FD_ZERO(&output);
+	 FD_SET(client_sock, &output);
+	 int ret = select(client_sock+1, NULL, &output, NULL, &tv);
+	 if (ret < 0) {
+		 return -1;
+	 } else if (ret == 0) {
+		 return 0;
+	 }
+	 else
+	 {
+		 return send(client_sock,info,length,0);
+	 }
+
+}
+
+
 /*
  * acs_tcp_receive   tcp server receive
 */
 int acs_tcp_receive(int client_sock,char* info,int *length)
 {
-	  char frame_msg[65536] = {0};
-	  int num = 0;
-	  uint16_t packLength = 0;
-	  num = recv(client_sock,frame_msg,10,0);//MSG_NOSIGNAL
-	  if(num < 0)
-	  {
-		  printf("acs_tcp_receive ret 1 is %d \n",num);
-		  return -1;
+	  fd_set output;
+	  struct timeval tv;
+	  tv.tv_sec = 20;
+	  tv.tv_usec = 0;
+	  FD_ZERO(&output);
+	  FD_SET(client_sock, &output);
+	  int ret = select(client_sock+1, NULL, &output, NULL, &tv);
+	  if (ret < 0) {
+			return -1;
+	  } else if (ret == 0) {
+			return 0;
 	  }
-	  if(num != 10)
+	  else
 	  {
-		  return -2;
+		  //rastyle protocal
+		  char frame_msg[65536] = {0};
+		  int num = 0;
+		  uint16_t packLength = 0;
+		  num = recv(client_sock,frame_msg,10,0);//MSG_NOSIGNAL
+		  if(num < 0)
+		  {
+			  printf("acs_tcp_receive ret 1 is %d \n",num);
+			  return -1;
+		  }
+		  if(num != 10)
+		  {
+			  return -2;
+		  }
+		  memcpy(&packLength,&frame_msg[8],sizeof(uint16_t));
+		  // printf("packLength is %d \n",packLength);
+		  num = 0;
+		  num = recv(client_sock,frame_msg+10,packLength-10,0);
+		  if(num < 0)
+		  {
+			  printf("acs_tcp_receive ret 2 is %d \n",num);
+			  return -1;
+		  }
+		  if(num < packLength-10)
+		  {
+			  return -3;
+		  }
+		  memcpy(info,frame_msg,packLength);
+		  *length = packLength;
+		  return packLength ;
 	  }
-	  memcpy(&packLength,&frame_msg[8],sizeof(uint16_t));
-	  // printf("packLength is %d \n",packLength);
-	  num = 0;
-	  num = recv(client_sock,frame_msg+10,packLength-10,0);
-	  if(num < 0)
-	  {
-		  printf("acs_tcp_receive ret 2 is %d \n",num);
-		  return -1;
-	  }
-	  if(num < packLength-10)
-	  {
-		  return -3;
-	  }
-	  memcpy(info,frame_msg,packLength);
-	  *length = packLength;
-	  return 0;
-
 }
 
 

@@ -57,6 +57,7 @@ void build_acs_connection(int sockfd)
 	printf("entry build acs connection begin \n");
 	//s1:serilze setup connect msg
 	serilze_setup_connect_msg(buf);
+#if 0
 	if ((sendbytes =
 	    	send(sockfd,
 			  seliaze_protocal_data(buf,(uint16_t)strlen(buf),connection,TEST_USER_ID),
@@ -65,10 +66,20 @@ void build_acs_connection(int sockfd)
 		perror("send setup_connect_msg falied !\n");
 		return;
 	}
+#endif
+	if ((sendbytes =
+	    	acs_tcp_send(sockfd,
+			 seliaze_protocal_data(buf,(uint16_t)strlen(buf),connection,TEST_USER_ID),
+			 strlen(buf)+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
+
+	{
+		perror("send setup_connect_msg falied !\n");
+		return;
+	}
 	//s2:receve encode message
 	memset(buf,0,BUFFER_SIZE);
-	recvbytes = acs_tcp_receive(sockfd, buf,&packlength);
-	if(recvbytes <=-1)
+	recvbytes = acs_tcp_receive(sockfd,buf,&packlength);
+	if(recvbytes < 0)
 	{
 		printf("acs client receive cloud 1 ack failed \n");
 		return ;
@@ -84,9 +95,17 @@ void build_acs_connection(int sockfd)
 	cipher_text = js_private_encrypt(plain_text,&tmp,ACS_PRIVATE_KEY);
 	//printf("after enrypt encode_length is %d \n",tmp);
 	free(plain_text);
-	if ((sendbytes = send(sockfd,
-				seliaze_protocal_data_for_encrypt(cipher_text,tmp,connection,TEST_USER_ID,rsa_encrypt),
-				tmp+PROTOCAL_FRAME_STABLE_LENGTH, 0)) < 0)
+
+	//if ((sendbytes = send(sockfd,
+	//		seliaze_protocal_data_for_encrypt(cipher_text,tmp,connection,TEST_USER_ID,rsa_encrypt),
+	//			tmp+PROTOCAL_FRAME_STABLE_LENGTH, 0)) < 0)
+	//{
+	//		perror("send setup_connect_msg falied ! failed");
+	//		return;
+	//}
+	if ((sendbytes = acs_tcp_send(sockfd,
+			    seliaze_protocal_data_for_encrypt(cipher_text,tmp,connection,TEST_USER_ID,rsa_encrypt),
+				tmp+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
 	{
 			perror("send setup_connect_msg falied ! failed");
 			return;
@@ -96,9 +115,16 @@ void build_acs_connection(int sockfd)
 	printf("acs receive app length is %d message string is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	//need to handle very string
 
-	if ((sendbytes = send(sockfd,
+	//if ((sendbytes = send(sockfd,
+	//				seliaze_protocal_data(setup_confim_msg,strlen(setup_confim_msg),connection,TEST_USER_ID),
+	//				strlen(setup_confim_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) < 0)
+	//{
+	//			perror("send setup_connect_msg falied ! failed");
+	//			return;
+	//}
+	if ((sendbytes = acs_tcp_send(sockfd,
 					seliaze_protocal_data(setup_confim_msg,strlen(setup_confim_msg),connection,TEST_USER_ID),
-					strlen(setup_confim_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) < 0)
+					strlen(setup_confim_msg)+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
 	{
 				perror("send setup_connect_msg falied ! failed");
 				return;
@@ -106,7 +132,10 @@ void build_acs_connection(int sockfd)
 #endif
 	//s4:acs receive confirm message
 	memset(buf,0,BUFFER_SIZE);
-	recvbytes = recv(sockfd,buf,1024,0);
+	packlength = 0;
+	recvbytes = acs_tcp_receive(sockfd,buf,&packlength);
+	//printf("buf at connection s4 is %s recvbytes is %d\n",deseliaze_protocal_data(buf,recvbytes),recvbytes);
+	//recvbytes = recv(sockfd,buf,1024,0);
 	if(recvbytes < 0)
 	{
 		perror("acs could received server verify string failed 2 \n");
@@ -121,11 +150,16 @@ void build_acs_connection(int sockfd)
 		printf("Fail;\n");
 	}
 	//s5
+#if 0
 	send(sockfd,
 		seliaze_protocal_data(setup_ack_msg,strlen(setup_ack_msg),connection,TEST_USER_ID),
 	    strlen(setup_ack_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
 		0
 		);
+#endif
+	acs_tcp_send(sockfd,
+		seliaze_protocal_data(setup_ack_msg,strlen(setup_ack_msg),connection,TEST_USER_ID),
+	    strlen(setup_ack_msg)+PROTOCAL_FRAME_STABLE_LENGTH);
 	printf("connetion sucessfull !\n");
 	printf("exit build acs connection end \n");
 }

@@ -50,23 +50,24 @@ int stetup_acs_app_connection(int sockfd,char * user_rsa_public_key)
 	char * plaintext = NULL;
 	//build acs connect
 	printf("entry build acs app connection begin \n");
-	recvbytes = recv(sockfd,verify_string_array,VERYFY_STRING_LENGTH,0);
-	if(recvbytes <= 0)
+	recvbytes = acs_tcp_receive(sockfd,verify_string_array,&packagelength);
+	if(recvbytes < 0)
 	{
 		perror("acs could not received app msg!\n");
 		return -1;
 	}
 	printf("acs receive app length is %d message string is %s\n",recvbytes,deseliaze_protocal_data(verify_string_array,recvbytes));
 	//acs send username
-	if(sendbytes = send(sockfd,
+	if(sendbytes = acs_tcp_send(sockfd,
 		seliaze_protocal_data(setup_username_msg,strlen(setup_username_msg),connection,TEST_USER_ID),
-		strlen(setup_username_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0) < 0)
+		strlen(setup_username_msg)+PROTOCAL_FRAME_STABLE_LENGTH) < 0)
 	{
 			perror("send setup_connect_msg falied ! failed");
 			return -1;
 	}
 	//acs received username
-	recvbytes = recv(sockfd,buf,1024,0);
+	packagelength = 0;
+	recvbytes = acs_tcp_receive(sockfd,buf,&packagelength);
 	if(recvbytes < 0)
 	{
 		perror("acs could received server verify string failed 2 \n");
@@ -83,10 +84,9 @@ int stetup_acs_app_connection(int sockfd,char * user_rsa_public_key)
 	if(acs_verify_user_name(userid,username) != 0)
 	{
 		printf("username is %s username is not match userid!  \n",username);
-		send(sockfd,
+		acs_tcp_send(sockfd,
 				seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
-				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-				0
+				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH
 				);
 		return -1;
 	}
@@ -95,15 +95,16 @@ int stetup_acs_app_connection(int sockfd,char * user_rsa_public_key)
 	printf("acs receive app username length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	acs_get_user_rsa_public_key(userid,user_rsa_public_key);
 	//printf("acs receive app username length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
-	if(sendbytes = send(sockfd,
+	if(sendbytes = acs_tcp_send(sockfd,
 		seliaze_protocal_data(setup_pwd_msg,strlen(setup_pwd_msg),connection,TEST_USER_ID),
-		strlen(setup_pwd_msg)+PROTOCAL_FRAME_STABLE_LENGTH,0) < 0)
+		strlen(setup_pwd_msg)+PROTOCAL_FRAME_STABLE_LENGTH) < 0)
 	{
 		perror("send setup_pwd_msg falied ! ");
 		return -1;
 	}
 	memset(buf,0,BUFFER_SIZE);
 	//receive rsa encrypt password
+	packagelength = 0;
 	recvbytes = acs_tcp_receive(sockfd,buf,&packagelength);
 	if(recvbytes < 0)
 	{
@@ -131,20 +132,18 @@ int stetup_acs_app_connection(int sockfd,char * user_rsa_public_key)
 	if(acs_verify_pwd(username,pwd) != 0)
 	{
 		printf("password wrong !\n");
-		send(sockfd,
+		acs_tcp_send(sockfd,
 				seliaze_protocal_data(setup_fail_msg,strlen(setup_fail_msg),connection,TEST_USER_ID),
-				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-			     0
+				strlen(setup_fail_msg)+PROTOCAL_FRAME_STABLE_LENGTH
 				);
 		printf("acs - app connetion failed  !\n");
 		return -1;
 	}
 	//printf("acs receive app pwd length is %d  msg is %s\n",recvbytes,deseliaze_protocal_data(buf,recvbytes));
 	//send confirm
-	send(sockfd,
+	acs_tcp_send(sockfd,
 			seliaze_protocal_data(setup_confirm_msg,strlen(setup_confirm_msg),connection,TEST_USER_ID),
-			strlen(setup_confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-			0);
+			strlen(setup_confirm_msg)+PROTOCAL_FRAME_STABLE_LENGTH);
 	printf("acs - app connetion sucessfull !\n");
 	printf("exit build acs app connection end \n");
 	return 0;

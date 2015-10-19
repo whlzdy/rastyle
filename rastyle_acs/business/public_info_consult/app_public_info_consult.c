@@ -92,25 +92,26 @@ void app_public_information_consult(int sockfd,char* user_rsa_public_key,char* d
 #endif
 	//s2:report keys update message
     if ((sendbytes =
-			send(sockfd,
+			acs_tcp_send(sockfd,
 			  seliaze_protocal_data(report_keys_update_msg,(uint16_t)strlen(report_keys_update_msg),public_consult,TEST_USER_ID),
-			  strlen(report_keys_update_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) == -1)
+			  strlen(report_keys_update_msg)+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
 	{
 		perror("report app public keys message s1 falied !\n");
 		return;
 	}
     //s3:report timeout
     if ((sendbytes =
-   			send(sockfd,
+   			acs_tcp_send(sockfd,
    			  seliaze_protocal_data(report_2_app_timeout,(uint16_t)strlen(report_2_app_timeout),public_consult,TEST_USER_ID),
-   			  strlen(report_2_app_timeout)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) == -1)
+   			  strlen(report_2_app_timeout)+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
    	{
    		perror("report app  timeout  message  falied !\n");
    		return;
    	}
     //s4:get app timeout time ack
     memset(recv_msg,0,1024);
-    recvbytes = recv(sockfd,recv_msg,1024,0);
+    package_length = 0;
+    recvbytes = acs_tcp_receive(sockfd,recv_msg,&package_length);
     if(recvbytes < 0)
     {
     	perror("receive app timeout ack message failed \n");
@@ -119,16 +120,17 @@ void app_public_information_consult(int sockfd,char* user_rsa_public_key,char* d
     printf("acs receive app timeout ack is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
     //s5:report record time
     if ((sendbytes =
-      			send(sockfd,
+      			acs_tcp_send(sockfd,
       			  seliaze_protocal_data(report_2_app_record,(uint16_t)strlen(report_2_app_record),public_consult,TEST_USER_ID),
-      			  strlen(report_2_app_record)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) == -1)
+      			  strlen(report_2_app_record)+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
       	{
       		perror("report public keys message s1 falied !\n");
       		return;
       	}
     //s6:get app record time ack
     memset(recv_msg,0,1024);
-    recvbytes = recv(sockfd,recv_msg,1024,0);
+    package_length = 0;
+    recvbytes = acs_tcp_receive(sockfd,recv_msg,&package_length);
     if(recvbytes < 0)
     {
     	perror("receive app record time ack message failed \n");
@@ -137,16 +139,17 @@ void app_public_information_consult(int sockfd,char* user_rsa_public_key,char* d
     printf("acs receive app record time ack is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
     //s7:report app 2 user
     if ((sendbytes =
-				send(sockfd,
+				acs_tcp_send(sockfd,
 				  seliaze_protocal_data(report_2_app_user,(uint16_t)strlen(report_2_app_user),public_consult,TEST_USER_ID),
-				  strlen(report_2_app_user)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) == -1)
+				  strlen(report_2_app_user)+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
 		{
 			perror("report app 2 user failed !\n");
 			return;
 		}
      //s8:get app record time ack
      memset(recv_msg,0,1024);
-     recvbytes = recv(sockfd,recv_msg,1024,0);
+     package_length = 0;
+     recvbytes = acs_tcp_receive(sockfd,recv_msg,&package_length);
      if(recvbytes < 0)
      {
     	 perror("receive app 2 user message failed \n");
@@ -155,16 +158,17 @@ void app_public_information_consult(int sockfd,char* user_rsa_public_key,char* d
      printf("acs receive app 2 user message ack is %s \n",deseliaze_protocal_data(recv_msg,recvbytes));
      //s9:report sensor rule
 	 if ((sendbytes =
-				send(sockfd,
+				acs_tcp_send(sockfd,
 				  seliaze_protocal_data(report_2_sensor_msg,(uint16_t)strlen(report_2_sensor_msg),public_consult,TEST_USER_ID),
-				  strlen(report_2_sensor_msg)+PROTOCAL_FRAME_STABLE_LENGTH, 0)) == -1)
+				  strlen(report_2_sensor_msg)+PROTOCAL_FRAME_STABLE_LENGTH)) < 0)
 		{
 			perror("report app sensor rule failed !\n");
 			return;
 		}
 	 //s10:get app sensor rule ack
 	 memset(recv_msg,0,1024);
-	 recvbytes = recv(sockfd,recv_msg,1024,0);
+	 package_length = 0;
+	 recvbytes = acs_tcp_receive(sockfd,recv_msg,&package_length);
 	 if(recvbytes < 0)
 	 {
 		 perror("receive app sensor rule message failed \n");
