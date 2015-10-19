@@ -60,7 +60,7 @@ void acs_app_realtime_handle(int sockfd,char *data,int length,eEncodeType encode
 	rc = send(sockfd,
 		 seliaze_protocal_data_for_encrypt(data,length,real_time,TEST_USER_ID,encode_type),
 		 length+PROTOCAL_FRAME_STABLE_LENGTH,
-		 0);//MSG_NOSIGNAL
+		 MSG_NOSIGNAL);//MSG_NOSIGNAL
 	if(rc == -1)
 	{
 		close(sockfd);
@@ -115,7 +115,7 @@ int get_app_record_callback (void * data, int col_count, char ** col_values, cha
 	 rc = send(sockfd,
 				seliaze_protocal_data(report_app_msg,strlen(report_app_msg),info_sync,TEST_USER_ID),
 				strlen(report_app_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-				0//MSG_NOSIGNAL
+				MSG_NOSIGNAL//MSG_NOSIGNAL
 				);
 	 if(rc == -1)
 	 {
@@ -156,7 +156,7 @@ int get_app_climate_callback (void * data, int col_count, char ** col_values, ch
 			 sockfd,
 			 seliaze_protocal_data(report_app_msg,strlen(report_app_msg),info_sync,TEST_USER_ID),
 			 strlen(report_app_msg)+PROTOCAL_FRAME_STABLE_LENGTH,
-			 0//MSG_NOSIGNAL
+			 MSG_NOSIGNAL//MSG_NOSIGNAL
 			 );
 	 if(rc == -1)
 	 {
@@ -218,7 +218,7 @@ void *handle_app_request_thread(void *args)
 			 acs_app_handle_list.app_conn_count--;
 			 break;
 		}
-		if((length > 0) && (recvbytes == 0))
+		if(length > 0)
 		{
 			int encode_len = 0;
 			memset(buffer,0,65536);
