@@ -188,6 +188,7 @@ void *handle_app_request_thread(void *args)
     char user_rsa_public_key[1024] = {0};          //1024 bit encrypt
     char user_des_key[64] = {0};                  //64 des key
     char * plaintext = NULL;
+    pthread_detach(pthread_self());
 	sockfd = *(((thread_arg*)args)->psockfd);
 	printf("app handle thread sockfd is %d created \n",sockfd);
 	printf("user_rsa_public_key is %p ",user_rsa_public_key);
@@ -318,5 +319,5 @@ void *handle_app_request_thread(void *args)
 		TusSleep(500);
 	}
 	printf("app handle_app_request_thread sockfd %d quit \n",sockfd);
-	pthread_detach(pthread_self());
+
 }
