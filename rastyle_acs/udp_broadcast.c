@@ -39,7 +39,7 @@
 
 #define MCAST_INTERVAL    3
 
-static char devid[] = "abc124";
+
 
 
 static void acs_get_ipaddr_and_bcastaddr(char * ipaddr ,char * bcastaddr)
@@ -131,7 +131,7 @@ void *acs_udp_broadcast_thread(void *args)
 	    strcat(udp_msg,broadcast_msg);
 	    strcat(udp_msg,ip_msg);
 	    strcat(udp_msg+strlen(udp_msg),",");
-	    strcat(udp_msg,devid);
+	    strcat(udp_msg,DEVICE_ID);
 	    strcat(udp_msg+strlen(udp_msg),",");
 	    strcat(udp_msg+strlen(udp_msg),tmp_msg);
 	    strcat(udp_msg+strlen(udp_msg),";");

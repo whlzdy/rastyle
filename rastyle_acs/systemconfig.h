@@ -45,14 +45,15 @@ typedef enum _tagencrypt
 //define sqlite
 #define ACS_CONFIG_DATEBASE   "/sddisk/acs_config.db"       //datebase name
 #define ABNORMAL_SENSOR_DATA  "abnormal_sensor_data_table"  //abnormal table name
-#define ACS_USER_DATA         "acs_user_table"         //user table name
+#define ACS_USER_DATA         "acs_user_table"              //user table name
 #define ACS_PLAN_TASK         "acs_plan_task_table"         //acs plan task table name
 #define ACS_CLIMATE_DATA      "acs_climate_data_table"      //acs climate data table name
 
 
 
 //define systeme config info
-#define ACS_DEV_UID     "abc124"
+//#define ACS_DEV_UID     "abc124" //for develop_board "abc124" ,"abc1234"
+#define TEST_USER_ID     0xa    //actual point to deviceid  for develop_board "0xa","0x01"
 
 
 

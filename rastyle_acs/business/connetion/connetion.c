@@ -89,10 +89,18 @@ void build_acs_connection(int sockfd)
 	deseliaze_protocal_encode_data(buf,packlength,(uint16_t *)&encode_length);
 	//printf("encode_length is %d \n",encode_length);
 	plain_text = js_public_decrypt(deseliaze_protocal_encode_data(buf,packlength,(uint16_t *)&tmp),encode_length,CLOUD_PUBLIC_KEY);//TEST_KEY CLOUD_PUBLIC_KEY
+	if(plain_text == NULL)
+	{
+		return;
+	}
 	//printf("acs receive cloud decrypt plain text is %s \n",plain_text);
 	//acs decryption
 	tmp = 0;
 	cipher_text = js_private_encrypt(plain_text,&tmp,ACS_PRIVATE_KEY);
+    if(cipher_text == NULL)
+    {
+    	return;
+    }
 	//printf("after enrypt encode_length is %d \n",tmp);
 	free(plain_text);
 

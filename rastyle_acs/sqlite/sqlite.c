@@ -10,9 +10,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "sqlite.h"
 #include <sqlite3.h>
+#include <pthread.h>
+
 #include "../systemconfig.h"
+#include "sqlite.h"
+
+static pthread_mutex_t sqlite_lock = PTHREAD_MUTEX_INITIALIZER;
 
 
 int select_print_callback(void * data, int col_count, char ** col_values, char ** col_Name)
@@ -33,7 +37,12 @@ void sqlite_get_record_data(char * dbname,char * sqldata,select_callback callbac
 {
 	sqlite3 *db = NULL;
 	char *zErrMsg = 0;
-	int rc;
+	int rc,retV;
+	if((retV=pthread_mutex_lock(&sqlite_lock)) != 0)
+	{
+			printf("sqlite_get_record_data pthread_mutex_trylock(&fifo_lock) != 0, =%d \n", retV);
+			return ;   /* failed to get lock */
+	}
 	rc = sqlite3_open(dbname, &db);
 	if( rc != SQLITE_OK )
 	{
@@ -43,6 +52,7 @@ void sqlite_get_record_data(char * dbname,char * sqldata,select_callback callbac
 	}
 	sqlite3_exec( db, sqldata, callback, args, &zErrMsg);
 	sqlite3_close(db);
+	pthread_mutex_unlock(&sqlite_lock);
 	db = 0;
 }
 
@@ -54,7 +64,12 @@ void acs_sqlite_exec_sql(char * dbname,char * sSQL)
 {
 	sqlite3 *db = NULL;
 	char *zErrMsg = 0;
-	int rc;
+	int rc,retV;
+	if((retV=pthread_mutex_lock(&sqlite_lock)) != 0)
+	{
+			printf("acs_sqlite_exec_sql pthread_mutex_trylock(&fifo_lock) != 0, =%d \n", retV);
+			return ;   /* failed to get lock */
+	}
 	rc = sqlite3_open(dbname, &db);
 	if( rc != SQLITE_OK )
 	{
@@ -67,6 +82,7 @@ void acs_sqlite_exec_sql(char * dbname,char * sSQL)
 		//printf("插入数据成功\n");
 	 }
 	sqlite3_close(db);
+	pthread_mutex_unlock(&sqlite_lock);
 	db = 0;
 }
 
@@ -81,7 +97,12 @@ void create_acs_plan_task_table(char * dbname)
 			" Cycle varchar(20),STATE varchar(20),beginningtime datetime ,Stoptime datetime);";
 	sqlite3 *db = NULL;
 	char *zErrMsg = 0;
-	int rc;
+	int rc,retV;
+	if((retV=pthread_mutex_lock(&sqlite_lock)) != 0)
+	{
+			printf("create_acs_plan_task_table pthread_mutex_trylock(&fifo_lock) != 0, =%d \n", retV);
+			return ;   /* failed to get lock */
+	}
 	rc = sqlite3_open(dbname, &db);
 	if( rc != SQLITE_OK )
 	{
@@ -99,6 +120,7 @@ void create_acs_plan_task_table(char * dbname)
 	}
 	// 关闭数据库
 	sqlite3_close(db);
+	pthread_mutex_unlock(&sqlite_lock);
 	db = 0;
 }
 
@@ -111,7 +133,12 @@ void create_acs_climate_table(char * dbname)
     char * sSQL1 = "create table acs_climate_data_table (Climatename varchar(20) PRIMARY KEY,CO2Concentration varchar(20),Temperature varchar(20),Humidity varchar(20));";
 	sqlite3 *db = NULL;
 	char *zErrMsg = 0;
-	int rc;
+	int rc,retV;
+	if((retV=pthread_mutex_lock(&sqlite_lock)) != 0)
+	{
+			printf("create_acs_climate_table pthread_mutex_trylock(&fifo_lock) != 0, =%d \n", retV);
+			return ;   /* failed to get lock */
+	}
 	rc = sqlite3_open(dbname, &db);
 	if( rc != SQLITE_OK )
 	{
@@ -129,6 +156,7 @@ void create_acs_climate_table(char * dbname)
 	}
 	// 关闭数据库
 	sqlite3_close(db);
+	pthread_mutex_unlock(&sqlite_lock);
 	db = 0;
 }
 
@@ -138,7 +166,12 @@ void create_acs_user_table(char * dbname)
 	char * sSQL1 = "create table acs_user_table (UserID integer PRIMARY KEY,Username varchar(20),PWD varchar(20),authorization varchar(20),isop varchar(20),Publickey varchar(128));";
 	sqlite3 *db = NULL;
 	char *zErrMsg = 0;
-	int rc;
+	int rc,retV;
+	if((retV=pthread_mutex_lock(&sqlite_lock)) != 0)
+	{
+			printf("create_acs_user_table pthread_mutex_trylock(&fifo_lock) != 0, =%d \n", retV);
+			return ;   /* failed to get lock */
+	}
 	rc = sqlite3_open(dbname, &db);
 	if( rc != SQLITE_OK )
 	{
@@ -156,6 +189,7 @@ void create_acs_user_table(char * dbname)
 	}
 	// 关闭数据库
 	sqlite3_close(db);
+	pthread_mutex_unlock(&sqlite_lock);
 	db = 0;
 }
 

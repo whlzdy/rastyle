@@ -19,7 +19,7 @@
 #define START_FLAGS                      0x0
 #define END_FLAGS                        0x17
 
-#define TEST_USER_ID   0xa    //actual point to deviceid
+
 
 
 

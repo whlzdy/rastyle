@@ -197,6 +197,8 @@ void *handle_app_request_thread(void *args)
     if(ret != 0)
     {
     	printf("app info verify failed  sockfd %d quit \n",sockfd);
+    	FD_CLR(sockfd,&inset);
+    	close(sockfd);
         return 0;
     }
     //printf("user_rsa_public_key is %s \n",user_rsa_public_key);

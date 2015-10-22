@@ -36,15 +36,23 @@ void bluetooth_connetion_message_config(int bluetooth_fd,acs_bluetooth_get_frame
 {
 	uint8_t  data[1024] = {0};
 	uint16_t length  = 0;
+	int ret ;
 	memset(data,0,1024);
-	tfn_get_frame_data(bluetooth_fd,data,&length);
+	while((ret = tfn_get_frame_data(bluetooth_fd,data,&length)) < 0)
+	{
+		TusSleep(50000);
+	}
 	printf("acs bluetooth at connection message config receive 2 len is %d message is %s \n",length,deseliaze_protocal_data(data,length));
 	write(bluetooth_fd,
 		   seliaze_protocal_data(acs_ssid_msg,(uint16_t)strlen(acs_ssid_msg),connection,TEST_USER_ID),
 		   strlen(acs_ssid_msg)+PROTOCAL_FRAME_STABLE_LENGTH
 		    );
 	memset(data,0,1024);
-	tfn_get_frame_data(bluetooth_fd,data,&length);
+
+	while((ret = tfn_get_frame_data(bluetooth_fd,data,&length))< 0)
+	{
+		TusSleep(50000);
+	}
 	printf("acs bluetooth at connection message config receive 3 len is %d message is %s \n",length,deseliaze_protocal_data(data,length));
 	write(bluetooth_fd,
 		   seliaze_protocal_data(confim_msg,(uint16_t)strlen(confim_msg),connection,TEST_USER_ID),

@@ -120,6 +120,10 @@ int stetup_acs_app_connection(int sockfd,char * user_rsa_public_key)
 	encode_len = packagelength -11;
 	//printf("encode_len is %d \n",encode_len);
 	plaintext = js_public_decrypt(deseliaze_protocal_encode_data(buf,packagelength,NULL),encode_len, user_rsa_public_key);
+	if(plaintext == NULL)
+	{
+		return -1;
+	}
 	//strcat(pwd,plaintext);//ACS_ANDROID_PUBLIC_KEY  ACS_IOS_PUBLIC_KEY
 	memcpy(pwd,plaintext,strlen(plaintext));
 	free(plaintext);
